@@ -621,9 +621,10 @@ class AetherVpnService : VpnService() {
      */
     private fun writeHevConfig(mtu: Int, targetPort: Int = SOCKS_PORT, isPsiphon: Boolean = false): File {
         val file = File(filesDir, "hev.yaml")
-        // Psiphon's SOCKS5 proxy only supports TCP CONNECT (cmd 0x01).
-        // UDP ASSOCIATE (cmd 0x03) is rejected, so disable UDP forwarding when chained.
-        val udpMode = if (isPsiphon) "off" else "udp"
+        // Keep udp mode as 'udp' so that non-DNS UDP traffic is sent as UDP ASSOCIATE.
+        // Psiphon will instantly reject UDP ASSOCIATE, triggering fast fallback to TCP
+        // in apps (e.g. QUIC falls back to TCP). If we set it to 'off' or 'tcp', it wraps
+        // UDP in TCP, causing connections to hang indefinitely.
         
         val mapdns = if (isPsiphon) """
             mapdns:
@@ -642,7 +643,7 @@ class AetherVpnService : VpnService() {
             socks5:
               address: $SOCKS_HOST
               port: $targetPort
-              udp: '$udpMode'
+              udp: 'udp'
             ${mapdns}misc:
               task-stack-size: 86016
               connect-timeout: 5000
