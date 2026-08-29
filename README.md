@@ -19,6 +19,7 @@
 - **Manual endpoint range now works on MASQUE and gool too**, not only on WireGuard: `prober.rs` carries the same additive patch (`AETHER_MASQUE_CIDRS`, then the shared `AETHER_SCAN_CIDRS`). Until 1.2.5 a pinned range was silently ignored on those protocols. The parser also accepts `188.114.96.0/24`, `188.114.96.x` and a bare `188.114.96.7` now.
 - **The engine baseline floor was raised to <span dir="ltr">1.7.0</span>**, so an automatic sync can never walk the core backwards past this release.
 <!-- core-sync:en -->
+- **Engine (core) upgraded to v1.8.0** automatically by the CI core-sync step (previous: v1.7.0). The app's engine patches were rebased onto the new sources with a three-way merge.
 
 ### 🆕 Everything new in core v1.7.0 is in the UI
 
