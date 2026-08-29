@@ -519,7 +519,12 @@ class AetherVpnService : VpnService() {
             builder.setBlocking(true)
         }
 
-        TunnelConfig.DNS_SERVERS.forEach { builder.addDnsServer(it) }
+        val isChainedPsiphon = profile.psiphonEnabled && profile.psiphonRegion != PsiphonRegion.DIRECT
+        if (isChainedPsiphon) {
+            builder.addDnsServer("198.18.0.2")
+        } else {
+            TunnelConfig.DNS_SERVERS.forEach { builder.addDnsServer(it) }
+        }
 
         // Split tunneling + loop prevention (keeps the engine's own traffic off
         // the TUN, equivalent to v2rayNG's in-process protect()).
@@ -588,7 +593,7 @@ class AetherVpnService : VpnService() {
     }
 
     private fun startTun2Socks(profile: ConnectionProfile, targetPort: Int = SOCKS_PORT, isPsiphon: Boolean = false) {
-        if (profile.blockedApps.isNotEmpty()) {
+        if (profile.blockedApps.isNotEmpty() && !isPsiphon) {
             val pfd = tun ?: throw IllegalStateException("TUN descriptor is null")
             val bridge = SocksTunBridge(
                 vpnService = this,
@@ -619,6 +624,16 @@ class AetherVpnService : VpnService() {
         // Psiphon's SOCKS5 proxy only supports TCP CONNECT (cmd 0x01).
         // UDP ASSOCIATE (cmd 0x03) is rejected, so disable UDP forwarding when chained.
         val udpMode = if (isPsiphon) "off" else "udp"
+        
+        val mapdns = if (isPsiphon) """
+            mapdns:
+              address: 198.18.0.2
+              port: 53
+              network: 100.64.0.0
+              netmask: 255.192.0.0
+              cache-size: 10000
+        """.trimIndent() + "\n" else ""
+        
         val yaml = """
             tunnel:
               mtu: $mtu
@@ -628,7 +643,7 @@ class AetherVpnService : VpnService() {
               address: $SOCKS_HOST
               port: $targetPort
               udp: '$udpMode'
-            misc:
+            ${mapdns}misc:
               task-stack-size: 86016
               connect-timeout: 5000
               tcp-read-write-timeout: 300000
