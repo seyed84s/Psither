@@ -262,6 +262,7 @@
     <string name="section_upstream">پراکسی بالادست (زنجیره‌سازی)</string>
     <string name="upstream_label">پراکسی بالادست</string>
     <string name="upstream_hint">socks5://127.0.0.1:1080</string>
+    <string name="upstream_help">عبور دادن ترافیک از یک پراکسی دیگر (مانند Tor). فرمت: socks5://host:port یا http://host:port.</string>
     <string name="reprovision_title">جایگزینی شناسهٔ ردشده</string>
     <string name="reprovision_desc">اگر کلادفلر شناسهٔ ذخیره‌شدهٔ دستگاه را نپذیرد، به‌جای نگه‌داشتن تونلی که وصل می‌شود اما ترافیکی عبور نمی‌دهد، به‌صورت خودکار شناسهٔ تازه ثبت می‌کند.</string>
 

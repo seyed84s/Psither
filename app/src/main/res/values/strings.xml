@@ -263,6 +263,7 @@
     <string name="section_upstream">Upstream proxy (chaining)</string>
     <string name="upstream_label">Upstream proxy</string>
     <string name="upstream_hint">socks5://127.0.0.1:1080</string>
+    <string name="upstream_help">Chain Aether through another proxy (e.g. Tor). Format: socks5://host:port or http://host:port.</string>
     <string name="reprovision_title">Replace a refused identity</string>
     <string name="reprovision_desc">If Cloudflare stops accepting the saved device identity, register a fresh one automatically instead of holding a tunnel that connects but carries no traffic.</string>
 
