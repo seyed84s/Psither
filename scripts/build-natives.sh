@@ -325,7 +325,6 @@ build_psiphon() {
     if [ -d "${psi_dir}/ConsoleClient" ] && command -v go >/dev/null 2>&1; then
       (
         cd "${psi_dir}/ConsoleClient"
-        export GOTOOLCHAIN=local
         export GODEBUG=checklinkname=0
         export CGO_ENABLED=1
         export CC="${clang_bin}"
