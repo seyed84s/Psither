@@ -367,7 +367,7 @@ class AetherVpnService : VpnService() {
             )
         } else {
             establishTun(profile)
-            startTun2Socks(profile, targetPort)
+            startTun2Socks(profile, targetPort, isChainedPsiphon)
             // LAN sharing: if the user enabled it, expose the tunnel to other
             // devices on the same Wi-Fi/hotspot (HTTP + SOCKS5 bridge).
             if (profile.lanShare) ShareBridge.start(localOnly = false)
@@ -587,7 +587,7 @@ class AetherVpnService : VpnService() {
         }
     }
 
-    private fun startTun2Socks(profile: ConnectionProfile, targetPort: Int = SOCKS_PORT) {
+    private fun startTun2Socks(profile: ConnectionProfile, targetPort: Int = SOCKS_PORT, isPsiphon: Boolean = false) {
         if (profile.blockedApps.isNotEmpty()) {
             val pfd = tun ?: throw IllegalStateException("TUN descriptor is null")
             val bridge = SocksTunBridge(
@@ -604,7 +604,7 @@ class AetherVpnService : VpnService() {
             tunBridge = bridge
             return
         }
-        val config = writeHevConfig(profile.mtu.coerceIn(576, 9000), targetPort)
+        val config = writeHevConfig(profile.mtu.coerceIn(576, 9000), targetPort, isPsiphon)
         val fd = tun?.fd ?: throw IllegalStateException("TUN descriptor is null")
         DiagnosticsLog.i(TAG, "Starting hev-socks5-tunnel in-process (fd=$fd, targetPort=$targetPort)")
         HevTunnel.start(config.absolutePath, fd)
@@ -614,8 +614,11 @@ class AetherVpnService : VpnService() {
     /**
      * Writes the hev-socks5-tunnel config.
      */
-    private fun writeHevConfig(mtu: Int, targetPort: Int = SOCKS_PORT): File {
+    private fun writeHevConfig(mtu: Int, targetPort: Int = SOCKS_PORT, isPsiphon: Boolean = false): File {
         val file = File(filesDir, "hev.yaml")
+        // Psiphon's SOCKS5 proxy only supports TCP CONNECT (cmd 0x01).
+        // UDP ASSOCIATE (cmd 0x03) is rejected, so disable UDP forwarding when chained.
+        val udpMode = if (isPsiphon) "off" else "udp"
         val yaml = """
             tunnel:
               mtu: $mtu
@@ -624,7 +627,7 @@ class AetherVpnService : VpnService() {
             socks5:
               address: $SOCKS_HOST
               port: $targetPort
-              udp: 'udp'
+              udp: '$udpMode'
             misc:
               task-stack-size: 86016
               connect-timeout: 5000
