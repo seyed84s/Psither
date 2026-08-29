@@ -331,7 +331,7 @@ build_psiphon() {
         export GOOS=android
         export GOARCH="${goarch}"
         [ -n "${goarm}" ] && export GOARM="${goarm}"
-        go build -trimpath -ldflags="-s -w" -o "${JNI_DIR}/${abi}/libpsi.so" .
+        go build -trimpath -ldflags="-s -w -checklinkname=0" -o "${JNI_DIR}/${abi}/libpsi.so" .
       )
       echo "    installed libpsi.so for ${abi}"
     else
