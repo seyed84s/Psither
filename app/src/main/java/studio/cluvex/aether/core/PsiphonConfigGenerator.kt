@@ -62,7 +62,7 @@ object PsiphonConfigGenerator {
             }
 
             put("PropagationChannelId", "FFFFFFFFFFFFFFFF")
-            put("SponsorId", "FFFFFFFFFFFFFFFF")
+            put("SponsorId", "1")
             put("EmitDiagnosticNotices", true)
         }
 
