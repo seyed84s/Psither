@@ -308,12 +308,48 @@ build_aether() {
   build_aether_abi "armeabi-v7a" "armv7-linux-androideabi"
 }
 
+# ---------------------------------------------------------------------------
+# 3) Psiphon tunnel core (Go, cross-compiled for Android)
+# ---------------------------------------------------------------------------
+build_psiphon() {
+  local psi_dir="${NATIVE_DIR}/psiphon"
+  echo "==> [psiphon] building psiphon-tunnel-core for Android"
+  
+  build_psi_abi() {
+    local abi="$1" goarch="$2" goarm="${3:-}"
+    echo "==> [psiphon] building for ${abi} (${goarch})"
+    mkdir -p "${JNI_DIR}/${abi}"
+    local clang_bin
+    clang_bin="$(clang_for_abi "${abi}")"
+
+    if [ -d "${psi_dir}/ConsoleClient" ] && command -v go >/dev/null 2>&1; then
+      (
+        cd "${psi_dir}/ConsoleClient"
+        export CGO_ENABLED=1
+        export CC="${clang_bin}"
+        export GOOS=android
+        export GOARCH="${goarch}"
+        [ -n "${goarm}" ] && export GOARM="${goarm}"
+        go build -trimpath -ldflags="-s -w" -o "${JNI_DIR}/${abi}/libpsi.so" .
+      )
+      echo "    installed libpsi.so for ${abi}"
+    else
+      echo "    [psiphon] Go compiler or ConsoleClient not found in environment; skipping local compile (will use bundled or release asset)"
+    fi
+  }
+
+  build_psi_abi "arm64-v8a"   "arm64"
+  build_psi_abi "armeabi-v7a" "arm"   "7"
+}
+
 case "${TARGET}" in
-  hev)    build_hev ;;
-  aether) build_aether ;;
-  all)    build_hev; build_aether ;;
-  *) echo "Usage: build-natives.sh [hev|aether|all]" >&2; exit 2 ;;
+  hev)     build_hev ;;
+  aether)  build_aether ;;
+  psiphon) build_psiphon ;;
+  all)     build_hev; build_aether; build_psiphon ;;
+  *) echo "Usage: build-natives.sh [hev|aether|psiphon|all]" >&2; exit 2 ;;
 esac
 
 echo "==> Done (${TARGET}). Installed libs:"
 find "${JNI_DIR}" -type f -name '*.so' -exec ls -la {} + 2>/dev/null || true
+

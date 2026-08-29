@@ -60,12 +60,11 @@ import studio.cluvex.aether.ui.components.DropdownSelector
 import studio.cluvex.aether.ui.components.LtrOutlinedTextField
 import studio.cluvex.aether.ui.components.SegmentedSelector
 
+import studio.cluvex.aether.model.PsiphonRegion
+
 /**
- * Collapsible "Advanced" card exposing the full engine v1.3.0 feature set:
- * protocol, scan mode, IP version, Amnezia-style obfuscation, endpoint
- * selection (auto / manual IP / custom range), keepalive, MTU, TLS
- * fragmentation, ECH, MASQUE-over-HTTP/2, quick reconnect, proxy mode and
- * per-app split tunneling.
+ * Collapsible "Advanced" card exposing the full engine feature set including
+ * Psiphon multi-country chaining and Aether anti-DPI options.
  */
 @Composable
 fun AdvancedPanel(
@@ -73,8 +72,6 @@ fun AdvancedPanel(
     onProfileChange: (ConnectionProfile) -> Unit,
     enabled: Boolean,
     modifier: Modifier = Modifier,
-    // True when hosted in the home-screen bottom sheet, where the card should
-    // open already expanded instead of requiring an extra tap.
     startExpanded: Boolean = false,
 ) {
     var expanded by remember { mutableStateOf(startExpanded) }
@@ -121,7 +118,63 @@ fun AdvancedPanel(
                 Column {
                     Spacer(Modifier.height(16.dp))
 
-                    // ---------- Core ----------
+                    // ---------- Psiphon Multi-Country ----------
+                    SectionHeader(stringResource(R.string.section_psiphon))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            SettingLabel(stringResource(R.string.psiphon_chain_title))
+                            HelperText(stringResource(R.string.psiphon_chain_desc))
+                        }
+                        Switch(
+                            checked = profile.psiphonEnabled,
+                            onCheckedChange = { onProfileChange(profile.copy(psiphonEnabled = it)) },
+                            enabled = enabled,
+                        )
+                    }
+                    Spacer(Modifier.height(12.dp))
+
+                    if (profile.psiphonEnabled) {
+                        SettingLabel(stringResource(R.string.psiphon_region_label))
+                        DropdownSelector(
+                            options = PsiphonRegion.entries,
+                            selected = profile.psiphonRegion,
+                            onSelect = { onProfileChange(profile.copy(psiphonRegion = it)) },
+                            label = { "${it.flag} ${it.enName}" },
+                            enabled = enabled,
+                        )
+                        Spacer(Modifier.height(12.dp))
+
+                        LtrOutlinedTextField(
+                            value = profile.psiphonProtocols,
+                            onValueChange = { onProfileChange(profile.copy(psiphonProtocols = it)) },
+                            enabled = enabled,
+                            singleLine = true,
+                            label = { Text(stringResource(R.string.psiphon_protocols_label)) },
+                            placeholder = { Text("OSSH, SSH, UNFRONTED-MEEK-HTTPS") },
+                            supportingText = { Text(stringResource(R.string.psiphon_protocols_hint)) },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Spacer(Modifier.height(12.dp))
+
+                        LtrOutlinedTextField(
+                            value = if (profile.psiphonTimeout == 0) "" else profile.psiphonTimeout.toString(),
+                            onValueChange = { onProfileChange(profile.copy(psiphonTimeout = it.toIntOrNull() ?: 25)) },
+                            enabled = enabled,
+                            singleLine = true,
+                            label = { Text(stringResource(R.string.psiphon_timeout_label)) },
+                            placeholder = { Text("25 (seconds)") },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+
+                    // ---------- Aether Core ----------
+                    SectionHeader(stringResource(R.string.section_aether_core))
+
                     SettingLabel(stringResource(R.string.protocol))
                     SegmentedSelector(
                         options = Protocol.entries,

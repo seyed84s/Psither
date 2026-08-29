@@ -14,6 +14,7 @@ import studio.cluvex.aether.model.EndpointMode
 import studio.cluvex.aether.model.IpVersion
 import studio.cluvex.aether.model.Noize
 import studio.cluvex.aether.model.Protocol
+import studio.cluvex.aether.model.PsiphonRegion
 import studio.cluvex.aether.model.ScanMode
 import studio.cluvex.aether.model.SplitMode
 import studio.cluvex.aether.vpn.AetherVpnService
@@ -130,6 +131,12 @@ object ProfileCodec {
         add("noProfRetry=${p.noProfileRetry}")
         add("coreLog=${p.coreLogLevel.name}")
         add("blockedApps=${p.blockedApps.joinToString(",")}")
+        // Psiphon Multi-Country
+        add("psiOn=${p.psiphonEnabled}")
+        add("psiReg=${p.psiphonRegion.name}")
+        add("psiProt=${p.psiphonProtocols.replace("\n", "").replace("\r", "")}")
+        add("psiTimeout=${p.psiphonTimeout}")
+        add("psiDns=${p.psiphonDns}")
     }.joinToString("\n")
 
     fun decode(raw: String?): ConnectionProfile {
@@ -180,6 +187,11 @@ object ProfileCodec {
                 coreLogLevel = map["coreLog"]?.let { enumOr<CoreLogLevel>(it) } ?: d.coreLogLevel,
                 blockedApps = map["blockedApps"]?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
                     ?: d.blockedApps,
+                psiphonEnabled = map["psiOn"]?.toBooleanStrictOrNull() ?: d.psiphonEnabled,
+                psiphonRegion = map["psiReg"]?.let { enumOr<PsiphonRegion>(it) } ?: d.psiphonRegion,
+                psiphonProtocols = map["psiProt"] ?: d.psiphonProtocols,
+                psiphonTimeout = map["psiTimeout"]?.toIntOrNull() ?: d.psiphonTimeout,
+                psiphonDns = map["psiDns"] ?: d.psiphonDns,
             )
         }.getOrDefault(d)
     }

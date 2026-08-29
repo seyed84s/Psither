@@ -262,7 +262,22 @@
     <string name="section_upstream">پراکسی بالادست (زنجیره‌سازی)</string>
     <string name="upstream_label">پراکسی بالادست</string>
     <string name="upstream_hint">socks5://127.0.0.1:1080</string>
-    <string name="upstream_help">اتصال را از دل پراکسی‌ای که همین حالا روی گوشی اجراست بیرون می‌برد. آدرس socks5://host:port همهٔ پروتکل‌ها را حمل می‌کند؛ http://host:port فقط MASQUE روی HTTP/2 را که خودِ برنامه برایتان فعال می‌کند. نام کاربری و گذرواژه را می‌توانید به شکل user:pass@host:port بنویسید؛ این مقدار به‌صورت محرمانه به موتور داده می‌شود و هرگز در خط فرمان آن قرار نمی‌گیرد. برای اتصال مستقیم خالی بگذارید.</string>
     <string name="reprovision_title">جایگزینی شناسهٔ ردشده</string>
     <string name="reprovision_desc">اگر کلادفلر شناسهٔ ذخیره‌شدهٔ دستگاه را نپذیرد، به‌جای نگه‌داشتن تونلی که وصل می‌شود اما ترافیکی عبور نمی‌دهد، به‌صورت خودکار شناسهٔ تازه ثبت می‌کند.</string>
+
+    <!-- Psiphon & Multi-Country Chaining -->
+    <string name="select_location">انتخاب کشور و لوکیشن</string>
+    <string name="search_country">جستجوی کشور یا کد…</string>
+    <string name="section_psiphon">اتصال زنجیره‌ای سایفون (لوکیشن کشورها)</string>
+    <string name="section_aether_core">هسته Aether و کلودفلر</string>
+    <string name="psiphon_chain_title">خروج با کشور دلخواه (سایفون)</string>
+    <string name="psiphon_chain_desc">هدایت ترافیک سایفون از دل تونل مبهم‌سازی‌شده Aether برای دریافت آی‌پی کشور مورد نظر</string>
+    <string name="psiphon_region_label">کشور خروجی</string>
+    <string name="psiphon_protocols_label">پروتکل‌های سایفون (اختیاری)</string>
+    <string name="psiphon_protocols_hint">جدا شده با کاما: OSSH, SSH, UNFRONTED-MEEK-HTTPS, FRONTED-MEEK-HTTP</string>
+    <string name="psiphon_timeout_label">تایم‌اوت سایفون (ثانیه)</string>
+    <string name="err_psiphon_timeout">ارتباط با هسته سایفون با خطا یا تایم‌اوت مواجه شد.</string>
+    <string name="search_clear">پاک کردن جستجو</string>
+    <string name="selected">انتخاب‌شده</string>
+    <string name="menu_close">بستن</string>
 </resources>

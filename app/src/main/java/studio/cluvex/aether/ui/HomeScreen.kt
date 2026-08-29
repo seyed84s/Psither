@@ -52,6 +52,8 @@ import studio.cluvex.aether.ui.components.ButtonMode
 import studio.cluvex.aether.ui.components.ConnectButton
 import studio.cluvex.aether.ui.components.ConnectionCard
 import studio.cluvex.aether.ui.components.DiagnosticsPanel
+import studio.cluvex.aether.ui.components.CountrySelectorButton
+import studio.cluvex.aether.ui.components.CountrySelectorSheet
 import studio.cluvex.aether.ui.theme.AetherMint
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,6 +95,10 @@ fun HomeScreen(
     // Advanced settings, reachable directly from the home screen (top-right).
     var showAdvancedSheet by remember { mutableStateOf(false) }
     val advancedSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    
+    // Country selection
+    var showCountrySheet by remember { mutableStateOf(false) }
+    val countrySheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val settingsEnabled = state is ConnectionState.Idle || state is ConnectionState.Error
 
     ModalNavigationDrawer(
@@ -123,7 +129,7 @@ fun HomeScreen(
                     Spacer(Modifier.height(20.dp))
 
                     if (drawerVisible) {
-                        DiagnosticsPanel()
+                        DiagnosticsPanel(state = state)
 
                         Spacer(Modifier.height(16.dp))
 
@@ -172,11 +178,20 @@ fun HomeScreen(
                     textAlign = TextAlign.Center,
                 )
 
-                Spacer(Modifier.height(28.dp))
+                Spacer(Modifier.height(16.dp))
+
+                // Location / Country Selector
+                CountrySelectorButton(
+                    region = profile.psiphonRegion,
+                    onClick = { showCountrySheet = true },
+                    enabled = settingsEnabled,
+                )
+
+                Spacer(Modifier.height(20.dp))
 
                 ConnectButton(mode = mode, onClick = onToggleConnection)
 
-                Spacer(Modifier.height(28.dp))
+                Spacer(Modifier.height(24.dp))
 
                 // 1.2.6: status, timer, IP, speeds and the protocol row used to
                 // be four separate floating surfaces here. They are one unified
@@ -262,6 +277,22 @@ fun HomeScreen(
                 }
             }
         }
+    }
+
+    if (showCountrySheet) {
+        CountrySelectorSheet(
+            selectedRegion = profile.psiphonRegion,
+            onSelectRegion = { newRegion ->
+                onProfileChange(
+                    profile.copy(
+                        psiphonRegion = newRegion,
+                        psiphonEnabled = newRegion != studio.cluvex.aether.model.PsiphonRegion.DIRECT,
+                    ),
+                )
+            },
+            onDismiss = { showCountrySheet = false },
+            sheetState = countrySheetState,
+        )
     }
 }
 

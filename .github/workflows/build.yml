@@ -108,6 +108,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build engine (Psiphon)
+        run: bash scripts/build-natives.sh psiphon
+
       # If the core moved AND the engine actually built with it, commit the new
       # CORE_VERSION, the refreshed upstream baseline and the auto-written
       # changelog lines back to the branch, so the repository always documents
@@ -475,6 +478,8 @@ jobs:
                 || { echo "ERROR: $apk lacks hev for $abi"; exit 1; }
               printf '%s\n' "$entries" | grep -qx "lib/${abi}/libaethertun.so" \
                 || { echo "ERROR: $apk lacks the aethertun JNI bridge for $abi"; exit 1; }
+              printf '%s\n' "$entries" | grep -qx "lib/${abi}/libpsi.so" \
+                || { echo "ERROR: $apk lacks the Psiphon engine for $abi"; exit 1; }
             done
             echo "Verified native cores in $apk (${abis[*]})"
           done

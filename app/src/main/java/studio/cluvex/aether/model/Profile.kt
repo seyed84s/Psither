@@ -204,6 +204,17 @@ data class ConnectionProfile(
      */
     val autoReprovision: Boolean = true,
 
+    // ---- Psiphon Multi-Country Chaining ----
+    /** Whether traffic is chained through Psiphon for country exit */
+    val psiphonEnabled: Boolean = false,
+    /** Selected Psiphon Egress Country */
+    val psiphonRegion: PsiphonRegion = PsiphonRegion.AUTO,
+    /** Custom Psiphon Protocols (comma-separated, blank for all) */
+    val psiphonProtocols: String = "",
+    /** Psiphon Handshake Timeout in Seconds */
+    val psiphonTimeout: Int = 25,
+    /** Psiphon Custom DNS Server */
+    val psiphonDns: String = "",
 ) {
     /** True when a Zero Trust organization is configured and usable. */
     val hasTeam: Boolean

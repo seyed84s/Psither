@@ -47,11 +47,15 @@ import java.io.File
  *      traffic through the proxy — replacing the need for v2rayNG entirely,
  *   5. supervises both processes and auto-reconnects on failure.
  */
+import studio.cluvex.aether.core.PsiphonProcess
+import studio.cluvex.aether.model.PsiphonRegion
+
 class AetherVpnService : VpnService() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var tun: ParcelFileDescriptor? = null
     private var engine: AetherProcess? = null
+    private var psiphonEngine: PsiphonProcess? = null
     private var tunnelStarted: Boolean = false
     private var runJob: Job? = null
 
@@ -292,6 +296,12 @@ class AetherVpnService : VpnService() {
                 "Local port $SOCKS_PORT is still busy after ${PORT_RELEASE_WAIT_MS / 1000}s — starting anyway.",
             )
         }
+        if (!PortProbe.awaitClosed(SOCKS_HOST, TunnelConfig.PSIPHON_SOCKS_PORT, PORT_RELEASE_WAIT_MS)) {
+            DiagnosticsLog.w(
+                TAG,
+                "Local port ${TunnelConfig.PSIPHON_SOCKS_PORT} is still busy after ${PORT_RELEASE_WAIT_MS / 1000}s — starting anyway.",
+            )
+        }
         DiagnosticsLog.i(TAG, "Launching engine (libaether.so)…")
         engine = AetherProcess(applicationInfo.nativeLibraryDir, filesDir).also { it.start(profile) }
 
@@ -315,25 +325,41 @@ class AetherVpnService : VpnService() {
         }
         DiagnosticsLog.i(TAG, "SOCKS5 port is up.")
 
+        val isChainedPsiphon = profile.psiphonEnabled && profile.psiphonRegion != PsiphonRegion.DIRECT
+        val targetPort = if (isChainedPsiphon) TunnelConfig.PSIPHON_SOCKS_PORT else SOCKS_PORT
+
+        if (isChainedPsiphon) {
+            DiagnosticsLog.i(
+                TAG,
+                "Starting Psiphon chain (${profile.psiphonRegion.flag} ${profile.psiphonRegion.enName}) via Aether upstream…",
+            )
+            psiphonEngine = PsiphonProcess(applicationInfo.nativeLibraryDir, filesDir).also { it.start(profile) }
+            val psiTimeoutMs = profile.psiphonTimeout.coerceIn(10, 120) * 1000L
+            val psiOpened = PortProbe.awaitOpen(SOCKS_HOST, TunnelConfig.PSIPHON_SOCKS_PORT, psiTimeoutMs) {
+                psiphonEngine?.isAlive() == true
+            }
+            if (!psiOpened) {
+                val died = psiphonEngine?.isAlive() != true
+                if (died) {
+                    DiagnosticsLog.e(TAG, "Psiphon engine exited before opening local SOCKS5 port.")
+                } else {
+                    DiagnosticsLog.e(TAG, "Psiphon handshake timed out after ${psiTimeoutMs / 1000}s.")
+                }
+                throw IllegalStateException(getString(R.string.err_psiphon_timeout))
+            }
+            DiagnosticsLog.i(TAG, "Psiphon SOCKS5 port ${TunnelConfig.PSIPHON_SOCKS_PORT} is up.")
+        }
+
         if (profile.proxyMode) {
             // Proxy mode: DON'T capture the whole device through a system TUN.
             // Instead expose the engine's SOCKS5 + an HTTP proxy so individual
-            // apps (or the Wi-Fi proxy setting) can opt in. This is ideal when
-            // only one app (e.g. Telegram) needs the tunnel. LAN exposure only
-            // happens when the user explicitly turned sharing on.
-            //
-            // startSync is ground truth: in proxy mode these listeners ARE the
-            // product, so a bind failure must fail the connection loudly
-            // instead of claiming "Local proxy ready" over dead ports (the old
-            // fire-and-forget start swallowed EADDRINUSE and still reported
-            // 1080/8118 as ready — external apps then couldn't connect).
-            val shareReady = ShareBridge.startSync(localOnly = !profile.lanShare)
+            // apps (or the Wi-Fi proxy setting) can opt in. Route through the
+            // correct port (Psiphon 1820 when chained, Aether 1819 when direct).
+            val shareReady = ShareBridge.startSync(localOnly = !profile.lanShare, upstreamPort = targetPort)
             if (!shareReady) {
                 DiagnosticsLog.e(TAG, "Proxy mode: the fixed local proxy ports could not be opened (see errors above).")
                 throw IllegalStateException(getString(R.string.err_proxy_ports))
             }
-            // Ports are FIXED (v2rayNG-style standard) — the same values are
-            // shown as copyable rows under the Proxy-mode toggle in the UI.
             DiagnosticsLog.i(
                 TAG,
                 "Proxy mode: system TUN skipped. Local proxy ready — " +
@@ -341,18 +367,12 @@ class AetherVpnService : VpnService() {
             )
         } else {
             establishTun(profile)
-            startTun2Socks(profile)
+            startTun2Socks(profile, targetPort)
             // LAN sharing: if the user enabled it, expose the tunnel to other
             // devices on the same Wi-Fi/hotspot (HTTP + SOCKS5 bridge).
             if (profile.lanShare) ShareBridge.start(localOnly = false)
         }
 
-        // GATING FIX: the app used to report Connected the moment the TUN /
-        // proxy was up while the 4-step self-test still ran in the background —
-        // users saw "Connected" long before the tunnel could actually carry
-        // traffic (and before the IP + flag appeared). The state is now held at
-        // Verifying, and Connected is reported ONLY after all four checks pass,
-        // so Connected == genuinely ready to browse.
         AetherController.setState(ConnectionState.Verifying)
         updateNotification(getString(R.string.state_verifying))
         DiagnosticsLog.i(
@@ -361,12 +381,9 @@ class AetherVpnService : VpnService() {
             else "TUN + hev tunnel started. Verifying end-to-end connectivity…",
         )
 
-        // In proxy mode, test THROUGH the shared SOCKS5 listener — the exact
-        // endpoint external apps connect to — so a dead bridge can no longer
-        // hide behind a passing engine-port (1819) self-test.
         val diagPort =
-            if (profile.proxyMode) ShareBridge.socksPort.value ?: SOCKS_PORT
-            else SOCKS_PORT
+            if (profile.proxyMode) ShareBridge.socksPort.value ?: targetPort
+            else targetPort
         val healthy = runCatching { Diagnostics.run(port = diagPort) }.getOrDefault(false)
         if (!healthy) {
             DiagnosticsLog.e(TAG, "Self-test failed — refusing to report Connected.")
@@ -389,42 +406,36 @@ class AetherVpnService : VpnService() {
     /** Keeps the engine alive; retries with backoff if it dies. */
     private suspend fun superviseEngine(profile: ConnectionProfile) {
         var attempt = 0
+        val isChainedPsiphon = profile.psiphonEnabled && profile.psiphonRegion != PsiphonRegion.DIRECT
         while (currentScopeActive()) {
-            if (engine?.isAlive() == true) {
+            val aetherAlive = engine?.isAlive() == true
+            val psiphonAlive = if (isChainedPsiphon) psiphonEngine?.isAlive() == true else true
+            if (aetherAlive && psiphonAlive) {
                 attempt = 0
-                // 1.2.2 CPU FIX: the supervisor used to wake up every 2 s for
-                // the ENTIRE lifetime of the tunnel just to ask "is the engine
-                // still alive?" — 1,800 wake-ups per hour of a healthy,
-                // otherwise idle connection, each one preventing the CPU from
-                // settling into a deep idle state and quietly draining the
-                // battery. Instead we now BLOCK on the process itself: the OS
-                // wakes us the instant the engine exits and never before, so a
-                // healthy tunnel costs exactly zero polling.
                 engine?.awaitExit(WATCHDOG_INTERVAL_MS)
-                // STABILITY WATCHDOG (1.2.4, hardened): the engine process can
-                // stay alive while its session silently dies -- the classic
-                // "connected, but after a minute or two no site opens"
-                // symptom. Probe end-to-end THROUGH the local SOCKS5 port and
-                // restart the engine only on SUSTAINED failure; see
-                // probeTunnelCycle() for why the bar is deliberately high.
-                if (engine?.isAlive() == true) {
-                    if (probeTunnelCycle()) {
+                // After waking, check both engines are still alive + probe
+                // through the ACTUAL exit port the TUN is using.
+                val stillAetherAlive = engine?.isAlive() == true
+                val stillPsiAlive = if (isChainedPsiphon) psiphonEngine?.isAlive() == true else true
+                if (stillAetherAlive && stillPsiAlive) {
+                    if (probeTunnelCycle(if (isChainedPsiphon) TunnelConfig.PSIPHON_SOCKS_PORT else SOCKS_PORT)) {
                         probeFailures = 0
                     } else if (++probeFailures >= WATCHDOG_FAIL_CYCLES) {
                         DiagnosticsLog.w(
                             TAG,
-                            "Watchdog: tunnel dead across $WATCHDOG_FAIL_CYCLES consecutive checks -- restarting the engine.",
+                            "Watchdog: tunnel dead across $WATCHDOG_FAIL_CYCLES consecutive checks -- restarting.",
                         )
                         probeFailures = 0
+                        psiphonEngine?.stop()
+                        psiphonEngine = null
                         engine?.stop()
                     }
                 }
                 continue
             }
 
+            // At least one engine died — restart both.
             if (attempt >= maxRetries(profile)) {
-                // KILL SWITCH (1.2.4): instead of tearing the VPN down and
-                // leaking direct, engage the blackhole lockdown.
                 if (profile.killSwitch || profile.strictKillSwitch) {
                     enterLockdown(profile)
                     return
@@ -437,20 +448,46 @@ class AetherVpnService : VpnService() {
             updateNotification(getString(R.string.state_reconnecting))
             delay(backoff)
 
+            // Stop any surviving half
+            psiphonEngine?.stop()
+            psiphonEngine = null
+            engine?.stop()
+            engine = null
+
+            // Restart Aether
             engine = AetherProcess(applicationInfo.nativeLibraryDir, filesDir).also { it.start(profile) }
-            if (PortProbe.awaitOpen(SOCKS_HOST, SOCKS_PORT, profile.connectTimeoutMs()) { engine?.isAlive() == true }) {
-                // Same gate as the initial connect: never claim Connected after
-                // a silent engine restart until traffic really flows again.
-                AetherController.setState(ConnectionState.Verifying)
-                updateNotification(getString(R.string.state_verifying))
-                if (runCatching { Diagnostics.run() }.getOrDefault(false)) {
-                    attempt = 0
-                    AetherController.setState(ConnectionState.Connected("$SOCKS_HOST:$SOCKS_PORT"))
-                    updateNotification(getString(R.string.state_connected))
-                } else {
-                    DiagnosticsLog.w(TAG, "Self-test failed after engine restart — retrying.")
+            if (!PortProbe.awaitOpen(SOCKS_HOST, SOCKS_PORT, profile.connectTimeoutMs()) { engine?.isAlive() == true }) {
+                continue
+            }
+
+            // Restart Psiphon if chained
+            if (isChainedPsiphon) {
+                psiphonEngine = PsiphonProcess(applicationInfo.nativeLibraryDir, filesDir).also { it.start(profile) }
+                val psiTimeoutMs = profile.psiphonTimeout.coerceIn(10, 120) * 1000L
+                if (!PortProbe.awaitOpen(SOCKS_HOST, TunnelConfig.PSIPHON_SOCKS_PORT, psiTimeoutMs) {
+                        psiphonEngine?.isAlive() == true
+                    }) {
+                    DiagnosticsLog.w(TAG, "Psiphon failed to restart — retrying.")
+                    psiphonEngine?.stop()
+                    psiphonEngine = null
                     engine?.stop()
+                    continue
                 }
+            }
+
+            // Verify end-to-end
+            val diagPort = if (isChainedPsiphon) TunnelConfig.PSIPHON_SOCKS_PORT else SOCKS_PORT
+            AetherController.setState(ConnectionState.Verifying)
+            updateNotification(getString(R.string.state_verifying))
+            if (runCatching { Diagnostics.run(port = diagPort) }.getOrDefault(false)) {
+                attempt = 0
+                AetherController.setState(ConnectionState.Connected("$SOCKS_HOST:$diagPort"))
+                updateNotification(getString(R.string.state_connected))
+            } else {
+                DiagnosticsLog.w(TAG, "Self-test failed after restart — retrying.")
+                psiphonEngine?.stop()
+                psiphonEngine = null
+                engine?.stop()
             }
         }
     }
@@ -550,49 +587,34 @@ class AetherVpnService : VpnService() {
         }
     }
 
-    private fun startTun2Socks(profile: ConnectionProfile) {
+    private fun startTun2Socks(profile: ConnectionProfile, targetPort: Int = SOCKS_PORT) {
         if (profile.blockedApps.isNotEmpty()) {
-            // PER-APP BLOCKING (1.2.4): hev-socks5-tunnel cannot filter per
-            // UID, so a userspace filter bridge (merged into Aether's
-            // SocksTunBridge) reads the TUN itself, resolves each flow's
-            // owning app and drops blocked apps' packets. It is activated
-            // ONLY when blocking is configured; the battle-tested hev path
-            // below stays the default for everyone else.
             val pfd = tun ?: throw IllegalStateException("TUN descriptor is null")
             val bridge = SocksTunBridge(
                 vpnService = this,
                 tunDescriptor = pfd,
                 socksHost = SOCKS_HOST,
-                socksPort = SOCKS_PORT,
+                socksPort = targetPort,
                 mtu = profile.mtu.coerceIn(576, 9000),
                 blockedPackagesProvider = { profile.blockedApps.toSet() },
                 routingEngine = RoutingEngine(emptyList()),
             )
-            DiagnosticsLog.i(TAG, "Starting userspace filter bridge (blocked apps=${profile.blockedApps.size})")
+            DiagnosticsLog.i(TAG, "Starting userspace filter bridge (blocked apps=${profile.blockedApps.size}, targetPort=$targetPort)")
             bridge.start()
             tunBridge = bridge
             return
         }
-        val config = writeHevConfig(profile.mtu.coerceIn(576, 9000))
-        // Use the LIVE fd of the ParcelFileDescriptor (do NOT detach): hev uses it
-        // while running and we close the pfd ourselves on teardown. The fd is only
-        // valid inside THIS process, which is exactly why hev must run in-process.
+        val config = writeHevConfig(profile.mtu.coerceIn(576, 9000), targetPort)
         val fd = tun?.fd ?: throw IllegalStateException("TUN descriptor is null")
-        DiagnosticsLog.i(TAG, "Starting hev-socks5-tunnel in-process (fd=$fd)")
+        DiagnosticsLog.i(TAG, "Starting hev-socks5-tunnel in-process (fd=$fd, targetPort=$targetPort)")
         HevTunnel.start(config.absolutePath, fd)
         tunnelStarted = true
     }
 
     /**
-     * Writes the hev-socks5-tunnel config in the exact shape v2rayNG uses.
-     *
-     * The critical difference from the previous (broken) version is the
-     * `tunnel.ipv4` / `tunnel.ipv6` fields. hev configures its internal lwIP
-     * netif from these; without them packets are pulled off the TUN fd but have
-     * nowhere to be routed, so the tunnel "connects" but no site ever loads.
-     * These MUST equal the VpnService addAddress values.
+     * Writes the hev-socks5-tunnel config.
      */
-    private fun writeHevConfig(mtu: Int): File {
+    private fun writeHevConfig(mtu: Int, targetPort: Int = SOCKS_PORT): File {
         val file = File(filesDir, "hev.yaml")
         val yaml = """
             tunnel:
@@ -601,13 +623,11 @@ class AetherVpnService : VpnService() {
               ipv6: '${TunnelConfig.TUN_IPV6}'
             socks5:
               address: $SOCKS_HOST
-              port: $SOCKS_PORT
+              port: $targetPort
               udp: 'udp'
             misc:
               task-stack-size: 86016
               connect-timeout: 5000
-              # 1.2.4 stability: the old 60s idle timeout killed long-lived
-              # sessions ("works 1-2 minutes, then no site opens").
               tcp-read-write-timeout: 300000
               udp-read-write-timeout: 120000
               log-level: warn
@@ -673,19 +693,19 @@ class AetherVpnService : VpnService() {
      * session still recovers automatically, and MASQUE's in-engine reconnect
      * loop gets room to finish before the app steps in.
      */
-    private suspend fun probeTunnelCycle(): Boolean {
+    private suspend fun probeTunnelCycle(probePort: Int = SOCKS_PORT): Boolean {
         repeat(PROBE_ATTEMPTS) { attempt ->
-            if (probeTunnelOnce(PROBE_TARGETS[attempt % PROBE_TARGETS.size])) return true
+            if (probeTunnelOnce(PROBE_TARGETS[attempt % PROBE_TARGETS.size], probePort)) return true
             if (attempt < PROBE_ATTEMPTS - 1) delay(PROBE_RETRY_GAP_MS)
         }
         return false
     }
 
-    /** Single TCP connect to [target] ("host:port") THROUGH the engine's local SOCKS5 listener. */
-    private fun probeTunnelOnce(target: String): Boolean = runCatching {
+    /** Single TCP connect to [target] ("host:port") THROUGH the given local SOCKS5 listener. */
+    private fun probeTunnelOnce(target: String, probePort: Int = SOCKS_PORT): Boolean = runCatching {
         val proxy = java.net.Proxy(
             java.net.Proxy.Type.SOCKS,
-            java.net.InetSocketAddress(SOCKS_HOST, SOCKS_PORT),
+            java.net.InetSocketAddress(SOCKS_HOST, probePort),
         )
         java.net.Socket(proxy).use {
             it.connect(
@@ -719,7 +739,7 @@ class AetherVpnService : VpnService() {
         }
     }
 
-    /** Stops sharing, the forwarder and the engine but deliberately KEEPS [tun]. */
+    /** Stops sharing, the forwarder and both engines but deliberately KEEPS [tun]. */
     private fun cleanupForwardingOnly() {
         try {
             ShareBridge.stop()
@@ -734,6 +754,11 @@ class AetherVpnService : VpnService() {
             }
             tunnelStarted = false
         }
+        try {
+            psiphonEngine?.stop()
+        } catch (_: Throwable) {
+        }
+        psiphonEngine = null
         try {
             engine?.stop()
         } catch (_: Throwable) {
@@ -773,6 +798,11 @@ class AetherVpnService : VpnService() {
             }
             tunnelStarted = false
         }
+        try {
+            psiphonEngine?.stop()
+        } catch (_: Throwable) {
+        }
+        psiphonEngine = null
         try {
             engine?.stop()
         } catch (_: Throwable) {

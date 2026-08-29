@@ -89,4 +89,9 @@ fi
 echo "   found Aether Cargo manifest(s):"
 find "${AETHER_SRC}" -maxdepth 2 -name Cargo.toml -not -path '*/target/*' | sed 's/^/     /'
 
+echo "==> Fetching psiphon-tunnel-core (Psiphon engine)"
+PSIPHON_REPO="Psiphon-Labs/psiphon-tunnel-core"
+PSIPHON_DIR="${NATIVE_DIR}/psiphon"
+clone_repo "${GH}/${PSIPHON_REPO}.git" "${PSIPHON_DIR}" ""
+
 echo "==> Native sources ready under ${NATIVE_DIR}"

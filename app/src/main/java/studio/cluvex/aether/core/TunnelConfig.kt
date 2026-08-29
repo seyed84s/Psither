@@ -16,6 +16,9 @@ object TunnelConfig {
     const val SOCKS_HOST = "127.0.0.1"
     const val SOCKS_PORT = 1819
 
+    /** Local SOCKS5 proxy the Psiphon engine exposes when chained. */
+    const val PSIPHON_SOCKS_PORT = 1820
+
     /** Point-to-point TUN addressing (matches hev tunnel.ipv4 / tunnel.ipv6). */
     const val TUN_IPV4 = "10.10.14.1"
     const val TUN_IPV4_PREFIX = 30
