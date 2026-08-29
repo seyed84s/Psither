@@ -130,6 +130,9 @@ object ShareBridge {
     @Volatile
     private var bindHost = "127.0.0.1"
 
+    @Volatile
+    private var currentUpstreamPort = TunnelConfig.SOCKS_PORT
+
     /**
      * Turn sharing on. Safe to call from ANY thread — including the UI thread:
      * binding sockets is a network operation and Android throws
@@ -137,8 +140,8 @@ object ShareBridge {
      * actual work runs on a short-lived background thread and [active] flips
      * to true once both listeners are ready.
      */
-    fun start(localOnly: Boolean = false) {
-        thread(name = "share-start", isDaemon = true) { startSync(localOnly) }
+    fun start(localOnly: Boolean = false, upstreamPort: Int = TunnelConfig.SOCKS_PORT) {
+        thread(name = "share-start", isDaemon = true) { startSync(localOnly, upstreamPort) }
     }
 
     /**
@@ -151,7 +154,7 @@ object ShareBridge {
      * proxy mode these listeners ARE the product, so a swallowed bind failure
      * meant "connected" with nothing listening on 1080/8118.
      */
-    fun startSync(localOnly: Boolean = false): Boolean = synchronized(this) {
+    fun startSync(localOnly: Boolean = false, upstreamPort: Int = TunnelConfig.SOCKS_PORT): Boolean = synchronized(this) {
         // Already up with a healthy listener? Nothing to do.
         if (_active.value && (socksServer?.isClosed == false || httpServer?.isClosed == false)) {
             return@synchronized true
@@ -163,6 +166,7 @@ object ShareBridge {
         closeServers()
         uploadBytesCounter.set(0L)
         downloadBytesCounter.set(0L)
+        currentUpstreamPort = upstreamPort
 
         // SECURITY: when not explicitly sharing to the LAN, bind loopback
         // only so no other device on the network can use us as an open
@@ -332,7 +336,7 @@ object ShareBridge {
         try {
             upstream.tcpNoDelay = true
             upstream.connect(
-                InetSocketAddress(TunnelConfig.SOCKS_HOST, TunnelConfig.SOCKS_PORT),
+                InetSocketAddress(TunnelConfig.SOCKS_HOST, currentUpstreamPort),
                 DIAL_TIMEOUT_MS,
             )
             relay(client, upstream)
@@ -414,7 +418,7 @@ object ShareBridge {
         return try {
             socket.tcpNoDelay = true
             socket.connect(
-                InetSocketAddress(TunnelConfig.SOCKS_HOST, TunnelConfig.SOCKS_PORT),
+                InetSocketAddress(TunnelConfig.SOCKS_HOST, currentUpstreamPort),
                 DIAL_TIMEOUT_MS,
             )
             socket.soTimeout = 30_000
