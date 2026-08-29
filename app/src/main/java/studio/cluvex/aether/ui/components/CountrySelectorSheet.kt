@@ -108,7 +108,10 @@ fun CountrySelectorSheet(
                     )
                 }
                 IconButton(onClick = {
-                    scope.launch { sheetState.hide() }.invokeOnCompletion { onDismiss() }
+                    scope.launch {
+                        try { sheetState.hide() } catch (_: Exception) {}
+                        onDismiss()
+                    }
                 }) {
                     Icon(
                         imageVector = Icons.Rounded.Close,
@@ -181,7 +184,10 @@ fun CountrySelectorSheet(
                             )
                             .clickable(role = Role.Button) {
                                 onSelectRegion(region)
-                                scope.launch { sheetState.hide() }.invokeOnCompletion { onDismiss() }
+                                scope.launch {
+                                    try { sheetState.hide() } catch (_: Exception) {}
+                                    onDismiss()
+                                }
                             }
                             .padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically,
