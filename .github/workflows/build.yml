@@ -67,11 +67,11 @@ jobs:
       # checks the official core repo and upgrades the vendored engine when a
       # newer release exists, preserving this app's own engine patches. The
       # script also appends the upgrade to the 1.2.2 changelog in both READMEs.
-      - name: Sync Aether core (auto-upgrade engine)
+      - name: Sync Psither core (auto-upgrade engine)
         run: bash scripts/sync-core.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AETHER_REPO: CluvexStudio/Aether
+          AETHER_REPO: CluvexStudio/Psither
 
       - name: Fetch native sources
         run: bash scripts/fetch-natives.sh
@@ -91,21 +91,21 @@ jobs:
       # it rolls the core back to the version the repo already shipped, rebuilds
       # and continues. Only a failure that is NOT caused by the auto-upgrade can
       # stop the pipeline here.
-      - name: Build engine (Aether)
+      - name: Build engine (Psither)
         run: |
           set -uo pipefail
-          if bash scripts/build-natives.sh aether; then
+          if bash scripts/build-natives.sh psither; then
             exit 0
           fi
           echo "::warning::Engine build failed with the freshly synced core."
-          if [ ! -d native/.core-prev/aether ]; then
+          if [ ! -d native/.core-prev/psither ]; then
             echo "::error::Engine build failed and there is no core upgrade to blame - this is a real build error."
             exit 1
           fi
           bash scripts/core-rollback.sh
           bash scripts/fetch-natives.sh
           set -e
-          bash scripts/build-natives.sh aether
+          bash scripts/build-natives.sh psither
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -126,15 +126,15 @@ jobs:
             echo "No core upgrade to record (already current, or it was rolled back)."
             exit 0
           fi
-          if [ -z "$(git status --porcelain native/aether README.md README.fa.md)" ]; then
+          if [ -z "$(git status --porcelain native/psither README.md README.fa.md)" ]; then
             echo "Core already up to date - nothing to commit."
             exit 0
           fi
-          CORE_V="$(tr -d '[:space:]' < native/aether/CORE_VERSION)"
+          CORE_V="$(tr -d '[:space:]' < native/psither/CORE_VERSION)"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add native/aether README.md README.fa.md
-          git commit -m "ci: auto-upgrade Aether core to v${CORE_V} + document in 1.2.2 changelog [skip ci]"
+          git add native/psither README.md README.fa.md
+          git commit -m "ci: auto-upgrade Psither core to v${CORE_V} + document in 1.2.2 changelog [skip ci]"
           git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
           git push origin "HEAD:${GITHUB_REF_NAME}" \
             || echo "WARNING: could not push the core upgrade back to the branch."
@@ -205,9 +205,9 @@ jobs:
             fi
             echo "First build: generating a CI keystore and persisting it to the repo."
             keytool -genkeypair -v -keystore "$KS" \
-              -storepass aether-ci-keystore -keypass aether-ci-keystore \
-              -alias aether-ci -keyalg RSA -keysize 2048 -validity 10950 \
-              -dname "CN=Aether Mobile CI, OU=AetherMobile, O=QW-AI-Code"
+              -storepass psither-ci-keystore -keypass psither-ci-keystore \
+              -alias psither-ci -keyalg RSA -keysize 2048 -validity 10950 \
+              -dname "CN=Psither Mobile CI, OU=PsitherMobile, O=QW-AI-Code"
             base64 -w0 "$KS" > .github/ci-keystore.jks.b64
             if [ "${GITHUB_REF_TYPE}" = "branch" ]; then
               git config user.name "github-actions[bot]"
@@ -225,9 +225,9 @@ jobs:
           fi
           {
             echo "KEYSTORE_PATH=$KS"
-            echo "KEYSTORE_PASSWORD=aether-ci-keystore"
-            echo "KEY_ALIAS=aether-ci"
-            echo "KEY_PASSWORD=aether-ci-keystore"
+            echo "KEYSTORE_PASSWORD=psither-ci-keystore"
+            echo "KEY_ALIAS=psither-ci"
+            echo "KEY_PASSWORD=psither-ci-keystore"
           } >> "$GITHUB_ENV"
 
       # ROOT FIX for "it builds in a fresh repo but fails in the real one":
@@ -421,7 +421,7 @@ jobs:
             exit 0
           fi
           {
-            echo "# SHA-256 of the certificate that signs every Aether release."
+            echo "# SHA-256 of the certificate that signs every Psither release."
             echo "# Recorded automatically on the first 1.2.2 build. Do not edit by hand:"
             echo "# if this value changes, users of 1.2.1 can no longer install an update"
             echo "# over their current app (they would have to uninstall and lose settings)."
@@ -472,13 +472,13 @@ jobs:
             [ -f "$apk" ] || continue
             found=1
             entries="$(unzip -Z1 "$apk")"
-            mapfile -t abis < <(printf '%s\n' "$entries" | sed -n 's#^lib/\([^/]*\)/libaether\.so$#\1#p')
-            [ "${#abis[@]}" -gt 0 ] || { echo "ERROR: no libaether.so in $apk"; exit 1; }
+            mapfile -t abis < <(printf '%s\n' "$entries" | sed -n 's#^lib/\([^/]*\)/libpsither\.so$#\1#p')
+            [ "${#abis[@]}" -gt 0 ] || { echo "ERROR: no libpsither.so in $apk"; exit 1; }
             for abi in "${abis[@]}"; do
               printf '%s\n' "$entries" | grep -qx "lib/${abi}/libhev-socks5-tunnel.so" \
                 || { echo "ERROR: $apk lacks hev for $abi"; exit 1; }
-              printf '%s\n' "$entries" | grep -qx "lib/${abi}/libaethertun.so" \
-                || { echo "ERROR: $apk lacks the aethertun JNI bridge for $abi"; exit 1; }
+              printf '%s\n' "$entries" | grep -qx "lib/${abi}/libpsithertun.so" \
+                || { echo "ERROR: $apk lacks the psithertun JNI bridge for $abi"; exit 1; }
               printf '%s\n' "$entries" | grep -qx "lib/${abi}/libpsi.so" \
                 || { echo "ERROR: $apk lacks the Psiphon engine for $abi"; exit 1; }
             done
@@ -504,14 +504,14 @@ jobs:
           for key in "${!MAP[@]}"; do
             src="$(find app/build/outputs/apk/release -iname "*${key}*.apk" | head -n1)"
             if [ -n "$src" ]; then
-              cp "$src" "${OUT}/Aether-${VERSION_NAME}-${MAP[$key]}.apk"
+              cp "$src" "${OUT}/Psither-${VERSION_NAME}-${MAP[$key]}.apk"
             fi
           done
           echo "Built APKs:"
           ls -la "$OUT"
 
       # Publish a Release on every successful build: each APK shows up as its
-      # own downloadable asset. The release TITLE is just "Aether vX.Y.Z"
+      # own downloadable asset. The release TITLE is just "Psither vX.Y.Z"
       # (no "(build N)" suffix); the tag still embeds the run number so every
       # build gets a unique tag. The "What's new" body comes from
       # .github/release-notes.md - update that file whenever the version changes.
@@ -519,7 +519,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}-build.{1}', env.VERSION_NAME, github.run_number) }}
-          name: ${{ startsWith(github.ref, 'refs/tags/') && format('Aether {0}', github.ref_name) || format('Aether v{0}', env.VERSION_NAME) }}
+          name: ${{ startsWith(github.ref, 'refs/tags/') && format('Psither {0}', github.ref_name) || format('Psither v{0}', env.VERSION_NAME) }}
           files: artifacts/*.apk
           make_latest: true
           body_path: .github/release-notes.md

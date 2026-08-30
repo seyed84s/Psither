@@ -65,7 +65,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "studio.cluvex.aether"
+        applicationId = "app.psither"
         minSdk = 26
         targetSdk = 35
         versionCode = 10
