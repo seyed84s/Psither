@@ -626,31 +626,32 @@ class AetherVpnService : VpnService() {
         // in apps (e.g. QUIC falls back to TCP). If we set it to 'off' or 'tcp', it wraps
         // UDP in TCP, causing connections to hang indefinitely.
         
-        val mapdns = if (isPsiphon) """
-            mapdns:
-              address: 198.18.0.2
-              port: 53
-              network: 100.64.0.0
-              netmask: 255.192.0.0
-              cache-size: 10000
-        """.trimIndent() + "\n" else ""
-        
-        val yaml = """
-            tunnel:
-              mtu: $mtu
-              ipv4: ${TunnelConfig.TUN_IPV4}
-              ipv6: '${TunnelConfig.TUN_IPV6}'
-            socks5:
-              address: $SOCKS_HOST
-              port: $targetPort
-              udp: 'udp'
-            ${mapdns}misc:
-              task-stack-size: 86016
-              connect-timeout: 5000
-              tcp-read-write-timeout: 300000
-              udp-read-write-timeout: 120000
-              log-level: warn
-        """.trimIndent()
+        val yaml = buildString {
+            appendLine("tunnel:")
+            appendLine("  mtu: $mtu")
+            appendLine("  ipv4: ${TunnelConfig.TUN_IPV4}")
+            appendLine("  ipv6: '${TunnelConfig.TUN_IPV6}'")
+            appendLine("socks5:")
+            appendLine("  address: $SOCKS_HOST")
+            appendLine("  port: $targetPort")
+            appendLine("  udp: 'udp'")
+            
+            if (isPsiphon) {
+                appendLine("mapdns:")
+                appendLine("  address: 198.18.0.2")
+                appendLine("  port: 53")
+                appendLine("  network: 100.64.0.0")
+                appendLine("  netmask: 255.192.0.0")
+                appendLine("  cache-size: 10000")
+            }
+            
+            appendLine("misc:")
+            appendLine("  task-stack-size: 86016")
+            appendLine("  connect-timeout: 5000")
+            appendLine("  tcp-read-write-timeout: 300000")
+            appendLine("  udp-read-write-timeout: 120000")
+            appendLine("  log-level: warn")
+        }
         file.writeText(yaml)
         DiagnosticsLog.i(TAG, "hev.yaml written:\n$yaml")
         return file
