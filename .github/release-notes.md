@@ -1,29 +1,29 @@
-# 🚀 Psither v1.0.0 - The Revolution Begins
+# 🚀 Psither v1.0.0 — Official Launch
 
-Welcome to the very first official release of **Psither**! 🎉
-This update brings a completely reimagined VPN experience, chaining the raw speed of Cloudflare WARP with the robust anti-censorship capabilities of Psiphon, all wrapped in a breathtaking new design.
+**Psither** is a next-generation Android VPN client engineered to bypass severe network restrictions with extreme speed, stability, and style. By chaining the high-throughput network of Cloudflare WARP with the robust anti-censorship routing of Psiphon, Psither delivers an unbreakable, high-speed tunnel anywhere in the world.
 
-### ✨ What's New in 1.0.0
-- **🎨 Revolutionary UI/UX (Neon Cyberpunk):** Say goodbye to the old drawer menus! We've introduced a brand-new 3-tab architecture (Connect, Servers, Settings) with vibrant neon colors, living animations, and a sleek modern vibe.
-- **🌍 Massive Server Expansion:** Integrated 20+ Psiphon locations directly into the app. Select your preferred country and Psither will automatically chain the connection.
-- **⚡ Turbo Mode by Default:** We've set the default endpoint scanning mode to `TURBO` for blazing-fast connection times right out of the box.
-- **🧠 Smarter Core (Bug Fixes):** Fixed critical routing bugs where Psiphon chaining would sometimes fail. Settings are now fully persistent across app restarts!
-- **📊 Live Connection Stats:** Redesigned the main screen to feature a live data strip showing your real connection duration, tunnel IP, and active server.
+### ✨ Key Features & Capabilities
+- **🛡️ Multi-Country Psiphon Chaining:** Seamlessly tunnel WARP traffic through 20+ global Psiphon egress nodes with zero manual configuration.
+- **⚡ Turbo Endpoint Scanner:** High-speed automatic endpoint discovery tuned for maximum throughput and minimal latency.
+- **🎨 Modern Cyberpunk UI:** A fluid, 3-tab architecture (Connect, Servers, Settings) built with dynamic ambient glows and continuous high-tech animations.
+- **📊 Real-Time Tunnel Telemetry:** Live duration timer, exit IP detection, and active routing statistics right on the dashboard.
+- **🔄 Smart Reconnect & Auto-Recovery:** Resilient tunnel management that withstands heavy packet drops and network fluctuations.
+- **🔀 Split Tunneling & Custom DNS:** Full control over which applications route through the VPN and custom in-tunnel DNS options.
 
 ---
 
 <div dir="rtl">
 
-# 🚀 سایثر نسخهٔ ۱.۰.۰ - آغاز یک انقلاب
+# 🚀 سایثر نسخهٔ ۱.۰.۰ — انتشار رسمی
 
-به اولین نسخهٔ رسمی **سایثر (Psither)** خوش آمدید! 🎉
-در این نسخه، ما سرعت بی‌نظیر Cloudflare WARP را با قدرت ضدسانسور Psiphon ترکیب کردیم و همه این‌ها را در یک ظاهر جدید و خیره‌کننده به شما ارائه می‌دهیم.
+**سایثر (Psither)** یک فیلترشکن نسل جدید و فوق‌پیشرفته برای اندروید است که به منظور عبور از شدیدترین محدودیت‌های اینترنت با نهایت سرعت و پایداری طراحی شده است. سایثر با ترکیب هوشمندانه سرعت بالای Cloudflare WARP و لایه ضدسانسور قدرتمند Psiphon، اتصالی امن، پایدار و بدون قطعی را برای شما فراهم می‌کند.
 
-### ✨ تغییرات و امکانات نسخهٔ ۱.۰.۰
-- **🎨 انقلاب در طراحی (تم سایبرپانک):** با منوهای کشویی قدیمی خداحافظی کنید! طراحی کاملاً جدید بر پایه ۳ تب (اتصال، سرورها، تنظیمات) با رنگ‌های زنده، انیمیشن‌های تنفسی و حس‌وحال هکری و مدرن.
-- **🌍 گسترش عظیم سرورها:** بیش از ۲۰ لوکیشن مختلف سایفون به برنامه اضافه شده است. کافیست کشور دلخواه را انتخاب کنید تا ترافیک شما به صورت زنجیره‌ای از آن عبور کند.
-- **⚡ سرعت توربو:** حالت اسکن سرورها به صورت پیش‌فرض روی `TURBO` قرار گرفت تا در کسری از ثانیه سریع‌ترین اتصال ممکن را پیدا کنید.
-- **🧠 هستهٔ هوشمندتر (رفع باگ‌های حیاتی):** باگ عدم ذخیره لوکیشن‌ها حل شد (الان برنامه همیشه کشور انتخابی شما را به یاد می‌آورد). همچنین مشکلات مربوط به مسیریابی سایفون کاملاً برطرف شده است.
-- **📊 آمار زنده:** اضافه شدن یک نوار اطلاعات زنده در صفحه اصلی که زمان دقیق اتصال، آی‌پی تونل و سرور فعال را به زیبایی نمایش می‌دهد.
+### ✨ ویژگی‌ها و قابلیت‌های اصلی
+- **🛡️ زنجیره‌سازی چندکشوری سایفون:** امکان عبور ترافیک از بیش از ۲۰ کشور مختلف بدون نیاز به هیچ‌گونه کانفیگ دستی.
+- **⚡ اسکنر فوق‌سریع توربو:** اسکن خودکار و در لحظه برای انتخاب سریع‌ترین مسیر و کمترین پینگ ممکن.
+- **🎨 رابط کاربری مدرن و چشم‌نواز:** طراحی سه‌تب پیشرفته (اتصال، سرورها، تنظیمات) همراه با انیمیشن‌های روان و نورپردازی جذاب نئونی.
+- **📊 نمایش آمار زنده اتصال:** مانیتورینگ دقیق مدت زمان اتصال، آی‌پی خروجی و وضعیت مسیر شبکه.
+- **🔄 اتصال مجدد هوشمند:** بازیابی خودکار اتصال در صورت نوسان یا اختلال شدید شبکه.
+- **🔀 تونل‌زنی مجزا (Split Tunneling):** مدیریت کامل اپلیکیشن‌های مجاز به استفاده از فیلترشکن و تنظیمات اختصاصی DNS.
 
 </div>
