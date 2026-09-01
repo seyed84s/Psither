@@ -40,7 +40,8 @@ import studio.cluvex.aether.BuildConfig
 import studio.cluvex.aether.R
 
 private const val URL_PORT_GITHUB = "https://github.com/seyed84s/aether-psiphon"
-private const val URL_AETHER_GITHUB = "https://github.com/bepass-org/Aether"
+private const val URL_CLUVEX_GITHUB = "https://github.com/CluvexStudio/Aether"
+private const val URL_QW_GITHUB = "https://github.com/QW-AI-Code/Aether"
 private const val URL_XPSIPHON_GITHUB = "https://github.com/IzumiRain/xPsiphon"
 
 private val PORT_IMPROVEMENTS = listOf(
@@ -147,7 +148,8 @@ fun AboutPanel(modifier: Modifier = Modifier) {
                         title = stringResource(R.string.about_original_title),
                         note = stringResource(R.string.about_original_note),
                     )
-                    LinkRow(R.drawable.ic_github, "Aether Core Engine", URL_AETHER_GITHUB)
+                    LinkRow(R.drawable.ic_github, "Cluvex Studio (Aether Core)", URL_CLUVEX_GITHUB)
+                    LinkRow(R.drawable.ic_github, "QW-AI-Code (Aether Android)", URL_QW_GITHUB)
                     LinkRow(R.drawable.ic_github, "xPsiphon Project", URL_XPSIPHON_GITHUB)
                     Spacer(Modifier.height(6.dp))
                     FeatureList(ORIGINAL_FEATURES)

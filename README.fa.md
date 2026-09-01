@@ -41,7 +41,8 @@
 
 سایثر یک تکامل مستقل است که با استفاده از دانش پروژه‌های بزرگ شکل گرفته است. ما صمیمانه از سازندگان و مشارکت‌کنندگان پروژه‌های زیر تشکر می‌کنیم:
 
-- **[Aether](https://github.com/bepass-org/Aether):** موتور هسته که پایه‌های WARP و ساختار اولیه ما را قدرت می‌بخشد.
+- **[Aether Core Engine](https://github.com/CluvexStudio/Aether):** موتور اصلی و هسته قدرتمند وارپ.
+- **[Aether Android Edition](https://github.com/QW-AI-Code/Aether):** نسخه پایه اندروید و معماری اولیه.
 - **[xPsiphon](https://github.com/IzumiRain/xPsiphon) و [xTor](https://github.com/IzumiRain/xTor):** برای کار پیشگامانه آن‌ها در زنجیره‌سازی پروتکل‌های سایفون و پیکربندی گره‌های کشورها.
 
 ## 📄 لایسنس

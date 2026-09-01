@@ -41,7 +41,8 @@ Psither is built using GitHub Actions. If you wish to build it locally, you will
 
 Psither is an independent evolution built upon the shoulders of giants. We sincerely thank the original creators and contributors of the following projects:
 
-- **[Aether](https://github.com/bepass-org/Aether):** The core engine that powers our base WARP implementation and UI foundations.
+- **[Aether Core Engine](https://github.com/CluvexStudio/Aether):** The original core engine powering WARP capabilities.
+- **[Aether Android Edition](https://github.com/QW-AI-Code/Aether):** The base Android client codebase and architecture.
 - **[xPsiphon](https://github.com/IzumiRain/xPsiphon) & [xTor](https://github.com/IzumiRain/xTor):** For their pioneering work in chaining Psiphon protocols and their extensive country node configurations.
 
 ## 📄 License
