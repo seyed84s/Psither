@@ -70,6 +70,13 @@ class ProfileStore(private val context: Context) {
         val routeSniff = booleanPreferencesKey("routeSniff")
         val routeSniffMs = intPreferencesKey("routeSniffMs")
         val autoReprovision = booleanPreferencesKey("autoReprovision")
+        
+        // Psiphon Multi-Country
+        val psiphonEnabled = booleanPreferencesKey("psiphonEnabled")
+        val psiphonRegion = stringPreferencesKey("psiphonRegion")
+        val psiphonProtocols = stringPreferencesKey("psiphonProtocols")
+        val psiphonTimeout = intPreferencesKey("psiphonTimeout")
+        val psiphonDns = stringPreferencesKey("psiphonDns")
     }
 
     /**
@@ -83,11 +90,17 @@ class ProfileStore(private val context: Context) {
 
     val profile: Flow<ConnectionProfile> = context.dataStore.data.map { prefs ->
         val d = ConnectionProfile()
+        
+        // Upgrade hook: if psiphonEnabled is not in prefs, this is an upgrade from the old store.
+        // The user requested TURBO as default, so we'll force it on upgrade.
+        val isUpgrade = !prefs.contains(Keys.psiphonEnabled)
+        val loadedScanMode = prefs[Keys.scan]?.let { runCatching { ScanMode.valueOf(it) }.getOrNull() }
+        val finalScanMode = if (isUpgrade) ScanMode.TURBO else (loadedScanMode ?: ScanMode.TURBO)
+
         ConnectionProfile(
             protocol = prefs[Keys.protocol]
                 ?.let { runCatching { Protocol.valueOf(it) }.getOrNull() } ?: Protocol.AUTO,
-            scanMode = prefs[Keys.scan]
-                ?.let { runCatching { ScanMode.valueOf(it) }.getOrNull() } ?: ScanMode.BALANCED,
+            scanMode = finalScanMode,
             ipVersion = prefs[Keys.ip]
                 ?.let { runCatching { IpVersion.valueOf(it) }.getOrNull() } ?: IpVersion.V4,
             quickReconnect = prefs[Keys.quick] ?: true,
@@ -139,6 +152,12 @@ class ProfileStore(private val context: Context) {
             routeSniff = prefs[Keys.routeSniff] ?: true,
             routeSniffMs = prefs[Keys.routeSniffMs] ?: 0,
             autoReprovision = prefs[Keys.autoReprovision] ?: true,
+            psiphonEnabled = prefs[Keys.psiphonEnabled] ?: d.psiphonEnabled,
+            psiphonRegion = prefs[Keys.psiphonRegion]
+                ?.let { runCatching { PsiphonRegion.valueOf(it) }.getOrNull() } ?: d.psiphonRegion,
+            psiphonProtocols = prefs[Keys.psiphonProtocols] ?: d.psiphonProtocols,
+            psiphonTimeout = prefs[Keys.psiphonTimeout] ?: d.psiphonTimeout,
+            psiphonDns = prefs[Keys.psiphonDns] ?: d.psiphonDns,
         )
     }
 
@@ -187,6 +206,13 @@ class ProfileStore(private val context: Context) {
             prefs[Keys.routeSniff] = profile.routeSniff
             prefs[Keys.routeSniffMs] = profile.routeSniffMs
             prefs[Keys.autoReprovision] = profile.autoReprovision
+            
+            // Psiphon Multi-Country
+            prefs[Keys.psiphonEnabled] = profile.psiphonEnabled
+            prefs[Keys.psiphonRegion] = profile.psiphonRegion.name
+            prefs[Keys.psiphonProtocols] = profile.psiphonProtocols
+            prefs[Keys.psiphonTimeout] = profile.psiphonTimeout
+            prefs[Keys.psiphonDns] = profile.psiphonDns
         }
         // Secrets go to the Keystore-sealed store, never to the prefs file.
         secrets.write(SecretStore.ACCESS_SECRET, profile.accessClientSecret)
