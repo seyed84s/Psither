@@ -1,14 +1,26 @@
-﻿package studio.cluvex.aether.ui.components
+package studio.cluvex.aether.ui.components
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -16,115 +28,138 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import studio.cluvex.aether.ui.theme.AetherBlue
 import studio.cluvex.aether.ui.theme.AetherError
 import studio.cluvex.aether.ui.theme.AetherMint
-import studio.cluvex.aether.ui.theme.Navy800
+import studio.cluvex.aether.ui.theme.Navy700
 
 enum class ButtonMode { IDLE, BUSY, CONNECTED, ERROR }
 
+/**
+ * Stealth Elite connect button — a large rounded square with an animated gold/crimson
+ * border, a glowing "P" logo in the centre, and a circular spinner overlay when busy.
+ */
 @Composable
 fun ConnectButton(
     mode: ButtonMode,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // True Black & Crimson Elite Vibe
-    val outerRingColor = when (mode) {
-        ButtonMode.IDLE -> AetherError // Crimson ring
-        ButtonMode.BUSY -> AetherBlue // Gold when connecting
-        ButtonMode.CONNECTED -> AetherMint // Bright Gold
-        ButtonMode.ERROR -> AetherError
-    }
-    
-    val innerContentColor = when (mode) {
-        ButtonMode.IDLE -> AetherBlue // Gold text
-        ButtonMode.BUSY -> AetherMint
+    val borderColor = when (mode) {
+        ButtonMode.IDLE -> AetherBlue
+        ButtonMode.BUSY -> AetherBlue
         ButtonMode.CONNECTED -> AetherMint
         ButtonMode.ERROR -> AetherError
     }
 
-    val animatedOuter by animateColorAsState(outerRingColor, tween(600), label = "outer")
-    val animatedInner by animateColorAsState(innerContentColor, tween(600), label = "inner")
+    val contentColor = when (mode) {
+        ButtonMode.IDLE -> AetherBlue
+        ButtonMode.BUSY -> AetherBlue
+        ButtonMode.CONNECTED -> AetherMint
+        ButtonMode.ERROR -> AetherError
+    }
 
-    val transition = rememberInfiniteTransition(label = "connect")
-    
-    // Smooth spinning for the outer ring when busy
-    val sweepRotation by transition.animateFloat(
+    val label = when (mode) {
+        ButtonMode.IDLE -> "CONNECT"
+        ButtonMode.BUSY -> "SECURING"
+        ButtonMode.CONNECTED -> "SECURED"
+        ButtonMode.ERROR -> "RETRY"
+    }
+
+    val animatedBorder by animateColorAsState(borderColor, tween(500), label = "border")
+    val animatedContent by animateColorAsState(contentColor, tween(500), label = "content")
+
+    val transition = rememberInfiniteTransition(label = "btn")
+
+    val pulseAlpha by transition.animateFloat(
+        initialValue = 0.55f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(tween(1200), RepeatMode.Reverse),
+        label = "pulse",
+    )
+
+    val rotationAngle by transition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
-        animationSpec = infiniteRepeatable(tween(2000, easing = LinearEasing)),
-        label = "sweep",
+        animationSpec = infiniteRepeatable(tween(2200, easing = LinearEasing)),
+        label = "rotation",
     )
-    
-    // Intense pulsing for the halo
-    val haloPulse by transition.animateFloat(
-        initialValue = 0.85f,
-        targetValue = 1.05f,
-        animationSpec = infiniteRepeatable(tween(1200, easing = LinearEasing), RepeatMode.Reverse),
-        label = "halo",
-    )
-    
-    val haloScale by animateFloatAsState(
-        targetValue = if (mode == ButtonMode.CONNECTED || mode == ButtonMode.BUSY) haloPulse else 1f,
-        animationSpec = tween(400),
-        label = "haloScale",
+
+    val borderAlpha = when (mode) {
+        ButtonMode.CONNECTED -> pulseAlpha
+        ButtonMode.BUSY -> pulseAlpha
+        ButtonMode.IDLE -> 0.45f
+        ButtonMode.ERROR -> 0.85f
+    }
+
+    val glowRadius by animateFloatAsState(
+        targetValue = when (mode) {
+            ButtonMode.CONNECTED -> 1.15f
+            ButtonMode.BUSY -> 0.95f
+            else -> 0f
+        },
+        animationSpec = tween(600),
+        label = "glow",
     )
 
     val interaction = remember { MutableInteractionSource() }
+    val shape = RoundedCornerShape(36.dp)
 
-    Box(contentAlignment = Alignment.Center, modifier = modifier.size(240.dp)) {
-        // Outer glowing halo (Crimson or Gold)
-        Canvas(modifier = Modifier.size(240.dp)) {
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(animatedOuter.copy(alpha = 0.40f), Color.Transparent),
-                    center = Offset(size.width / 2f, size.height / 2f),
-                    radius = size.minDimension / 2f * haloScale,
-                ),
-                radius = size.minDimension / 2f * haloScale,
-            )
-            
-            // Sharp outer ring
-            drawCircle(
-                color = animatedOuter.copy(alpha = 0.8f),
-                radius = (size.minDimension / 2f) * 0.75f,
-                style = Stroke(width = 2.dp.toPx())
-            )
-            
-            // If busy, draw a spinner arc on the ring
-            if (mode == ButtonMode.BUSY) {
-                drawArc(
-                    color = Color.White,
-                    startAngle = sweepRotation,
-                    sweepAngle = 120f,
-                    useCenter = false,
-                    style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round),
-                    topLeft = Offset(size.width * 0.125f, size.height * 0.125f),
-                    size = androidx.compose.ui.geometry.Size(size.width * 0.75f, size.height * 0.75f)
+    Box(contentAlignment = Alignment.Center, modifier = modifier.size(210.dp)) {
+        // Outer glow
+        if (glowRadius > 0f) {
+            Canvas(Modifier.fillMaxSize()) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            animatedBorder.copy(alpha = 0.28f * pulseAlpha),
+                            Color.Transparent,
+                        ),
+                        center = Offset(size.width / 2f, size.height / 2f),
+                        radius = size.minDimension / 2f * glowRadius,
+                    ),
+                    radius = size.minDimension / 2f * glowRadius,
                 )
             }
         }
 
-        // Inner solid disc
+        // Busy spinner ring (circular, just outside the square)
+        if (mode == ButtonMode.BUSY) {
+            Canvas(Modifier.size(190.dp)) {
+                rotate(rotationAngle) {
+                    drawArc(
+                        color = animatedBorder,
+                        startAngle = 0f,
+                        sweepAngle = 100f,
+                        useCenter = false,
+                        style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round),
+                    )
+                }
+            }
+        }
+
+        // Main button body — rounded square
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(160.dp)
-                .clip(CircleShape)
+                .size(170.dp)
+                .clip(shape)
+                .border(
+                    width = 2.5.dp,
+                    color = animatedBorder.copy(alpha = borderAlpha),
+                    shape = shape,
+                )
                 .background(
-                    Brush.radialGradient(
-                        listOf(Navy800, Color.Black)
-                    )
+                    Brush.radialGradient(listOf(Navy700, Color.Black)),
                 )
                 .clickable(
                     interactionSource = interaction,
@@ -134,31 +169,21 @@ fun ConnectButton(
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center,
             ) {
-                // Stylized P logo text
                 Text(
                     text = "P",
-                    fontSize = 48.sp,
+                    fontSize = 56.sp,
                     fontWeight = FontWeight.Black,
-                    color = animatedInner,
-                    style = MaterialTheme.typography.displayLarge
+                    color = animatedContent,
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                
-                val label = when (mode) {
-                    ButtonMode.IDLE -> "CONNECT"
-                    ButtonMode.BUSY -> "SECURING..."
-                    ButtonMode.CONNECTED -> "CONNECTED"
-                    ButtonMode.ERROR -> "RETRY"
-                }
-                
+                Spacer(Modifier.height(2.dp))
                 Text(
                     text = label,
-                    fontSize = 14.sp,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
-                    color = animatedInner,
-                    letterSpacing = 2.sp
+                    letterSpacing = 3.sp,
+                    color = animatedContent.copy(alpha = 0.75f),
                 )
             }
         }
