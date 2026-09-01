@@ -1,25 +1,29 @@
-# AetherMobile v1.2.6
+# 🚀 Psither v1.0.0 - The Revolution Begins
 
-- **Engine upgraded:** bundled core is now 1.7.0 (was 1.6.0): routing rules matched on the name read from the first bytes, upstream-proxy chaining, automatic replacement of a refused device identity, and a WireGuard hunt that verifies several endpoints on distinct addresses.
-- **New in the UI:** Upstream proxy (chaining), "match domain rules behind the tunnel" with a tunable wait window, and "replace a refused identity".
-- **Silent patch-loss bug fixed:** the merge baseline shipped in 1.2.5 was the patched file, so the next automatic core upgrade would have dropped the app manual-range patch without warning. Patches are now marker-wrapped, the merge base is rebuilt from those markers offline, every merge is verified, and the failure is covered by a new offline test scenario (19 checks, all green).
-- **Manual endpoint range now applies to MASQUE and gool too**, not only WireGuard, and accepts `188.114.96.0/24`, `188.114.96.x` or a bare address.
-- **Redesigned home screen:** status, session timer, server IP, live speeds and the protocol/endpoint/latency row are now ONE unified glassmorphic card with an animated equaliser glow on its edge while connected, pinned to the Aether palette and drawn without costing a recomposition per frame.
-- **Signing preserved:** version code 10; existing signing configuration unchanged, so it installs over 1.2.5 in place.
+Welcome to the very first official release of **Psither**! 🎉
+This update brings a completely reimagined VPN experience, chaining the raw speed of Cloudflare WARP with the robust anti-censorship capabilities of Psiphon, all wrapped in a breathtaking new design.
 
-Version: AetherMobile 1.2.6, version code 10. Bundled core 1.7.0.
+### ✨ What's New in 1.0.0
+- **🎨 Revolutionary UI/UX (Neon Cyberpunk):** Say goodbye to the old drawer menus! We've introduced a brand-new 3-tab architecture (Connect, Servers, Settings) with vibrant neon colors, living animations, and a sleek modern vibe.
+- **🌍 Massive Server Expansion:** Integrated 20+ Psiphon locations directly into the app. Select your preferred country and Psither will automatically chain the connection.
+- **⚡ Turbo Mode by Default:** We've set the default endpoint scanning mode to `TURBO` for blazing-fast connection times right out of the box.
+- **🧠 Smarter Core (Bug Fixes):** Fixed critical routing bugs where Psiphon chaining would sometimes fail. Settings are now fully persistent across app restarts!
+- **📊 Live Connection Stats:** Redesigned the main screen to feature a live data strip showing your real connection duration, tunnel IP, and active server.
+
+---
 
 <div dir="rtl">
 
-# AetherMobile نسخهٔ ۱.۲.۶
+# 🚀 سایثر نسخهٔ ۱.۰.۰ - آغاز یک انقلاب
 
-- **ارتقای موتور:** هستهٔ همراه اکنون 1.7.0 است (پیش‌تر 1.6.0): تطبیق قواعد مسیریابی روی نام خوانده‌شده از نخستین بایت‌ها، زنجیره‌سازی با پراکسی بالادست، جایگزینی خودکار شناسهٔ ردشده، و جستوجوی چند اندپوینت وایرگارد روی آدرس‌های متمایز.
-- **تازه‌ها در رابط کاربری:** پراکسی بالادست (زنجیره‌سازی)، «تطبیق قواعد دامنه در پشت تونل» با پنجرهٔ انتظار قابل تنطیم، و «جایگزینی شناسهٔ ردشده».
-- **رفع یک باگ بی‌صدا:** فایل مبنای ادغام که در ۱.۲.۵ منتشر شد همان فایل پچ‌خورده بود، پس ارتقای خودکار بعدی پچ محدودهٔ دستی را بی‌هیچ هشداری دور می‌انداخت. حالا پچ‌ها نشانه‌گذاری شده‌اند، مبنا آفلاین بازسازی می‌شود، هر ادغام راستی‌آزمایی می‌شود و سناریوی تازه‌ای این خرابی را پوشش می‌دهد (۱۹ بررسی، همه سبز).
-- **محدودهٔ دستی اندپوینت** اکنون روی MASQUE و gool هم اعمال می‌شود، نه فقط وایرگارد.
-- **بازطراحی صفحهٔ اصلی:** وضعیت، زمان‌سنج سشن، آی‌پی سرور، سرعت زنده و ردیف پروتکل/اندپوینت/تأخیر همه در یک کارت شیشه‌ای یکدست، با هالهٔ متحرک اکولایزری روی لبه در حالت متصل.
-- **حفظ امضا:** version code برابر 10 است و تنطیمات امضا تغییر نکرده، پس روی ۱.۲.۵ در جای خود نصب می‌شود.
+به اولین نسخهٔ رسمی **سایثر (Psither)** خوش آمدید! 🎉
+در این نسخه، ما سرعت بی‌نظیر Cloudflare WARP را با قدرت ضدسانسور Psiphon ترکیب کردیم و همه این‌ها را در یک ظاهر جدید و خیره‌کننده به شما ارائه می‌دهیم.
 
-نسخه: AetherMobile 1.2.6، version code 10، هستهٔ همراه 1.7.0.
+### ✨ تغییرات و امکانات نسخهٔ ۱.۰.۰
+- **🎨 انقلاب در طراحی (تم سایبرپانک):** با منوهای کشویی قدیمی خداحافظی کنید! طراحی کاملاً جدید بر پایه ۳ تب (اتصال، سرورها، تنظیمات) با رنگ‌های زنده، انیمیشن‌های تنفسی و حس‌وحال هکری و مدرن.
+- **🌍 گسترش عظیم سرورها:** بیش از ۲۰ لوکیشن مختلف سایفون به برنامه اضافه شده است. کافیست کشور دلخواه را انتخاب کنید تا ترافیک شما به صورت زنجیره‌ای از آن عبور کند.
+- **⚡ سرعت توربو:** حالت اسکن سرورها به صورت پیش‌فرض روی `TURBO` قرار گرفت تا در کسری از ثانیه سریع‌ترین اتصال ممکن را پیدا کنید.
+- **🧠 هستهٔ هوشمندتر (رفع باگ‌های حیاتی):** باگ عدم ذخیره لوکیشن‌ها حل شد (الان برنامه همیشه کشور انتخابی شما را به یاد می‌آورد). همچنین مشکلات مربوط به مسیریابی سایفون کاملاً برطرف شده است.
+- **📊 آمار زنده:** اضافه شدن یک نوار اطلاعات زنده در صفحه اصلی که زمان دقیق اتصال، آی‌پی تونل و سرور فعال را به زیبایی نمایش می‌دهد.
 
 </div>
