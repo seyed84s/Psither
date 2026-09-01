@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.sp
 import studio.cluvex.aether.R
 import studio.cluvex.aether.model.ConnectionProfile
 import studio.cluvex.aether.model.ConnectionState
+import studio.cluvex.aether.model.isConnected
+import studio.cluvex.aether.model.isBusy
 import studio.cluvex.aether.ui.components.ConnectButton
 import studio.cluvex.aether.ui.components.ButtonMode
 import studio.cluvex.aether.ui.theme.*
@@ -29,12 +31,10 @@ fun HomeScreen(
     state: ConnectionState,
     profile: ConnectionProfile,
     connectedSince: Long?,
-    ipInfo: studio.cluvex.aether.model.IpInfo?,
+    ipInfo: studio.cluvex.aether.core.IpEndpoint?,
     ipLoading: Boolean,
-    settingsEnabled: Boolean,
-    onToggleConnection: () -> Unit,
     onProfileChange: (ConnectionProfile) -> Unit,
-    onCheckIp: () -> Unit,
+    onToggleConnection: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var currentTab by remember { mutableStateOf(0) }
