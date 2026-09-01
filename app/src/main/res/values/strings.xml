@@ -168,8 +168,7 @@
 
 
 
-    <!-- About: engine/core version (parity with the Windows edition) -->
-    <string name="about_core_version">Engine (core) version %1$s</string>
+    <!-- Quick Settings tile -->
 
     <!-- Engine v1.5.0 features -->
     <string name="section_zerotrust">Zero Trust (organization)</string>
