@@ -207,7 +207,7 @@ jobs:
             keytool -genkeypair -v -keystore "$KS" \
               -storepass aether-ci-keystore -keypass aether-ci-keystore \
               -alias aether-ci -keyalg RSA -keysize 2048 -validity 10950 \
-              -dname "CN=Aether Mobile CI, OU=AetherMobile, O=QW-AI-Code"
+              -dname "CN=Psither Mobile CI, OU=PsitherMobile, O=Psither"
             base64 -w0 "$KS" > .github/ci-keystore.jks.b64
             if [ "${GITHUB_REF_TYPE}" = "branch" ]; then
               git config user.name "github-actions[bot]"

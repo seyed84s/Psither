@@ -1,5 +1,5 @@
-Aether Mobile
-Copyright (C) 2026 Aether Mobile contributors
+Psither
+Copyright (C) 2026 Psither contributors
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU Affero General Public License as published by the Free
@@ -13,6 +13,8 @@ PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License along
 with this program. If not, see <https://www.gnu.org/licenses/>.
 
-This project builds upon:
-  - Aether engine (CluvexStudio/Aether), AGPL-3.0
-  - hev-socks5-tunnel (heiher/hev-socks5-tunnel), Apache-2.0 / MIT
+This project builds upon and acknowledges:
+  - Aether Android Edition (github.com/QW-AI-Code/Aether) by QW-AI-Code
+  - Aether Core Engine (github.com/CluvexStudio/Aether), AGPL-3.0
+  - xPsiphon & xTor (github.com/IzumiRain/xPsiphon), GPLv3
+  - hev-socks5-tunnel (github.com/heiher/hev-socks5-tunnel), Apache-2.0 / MIT
