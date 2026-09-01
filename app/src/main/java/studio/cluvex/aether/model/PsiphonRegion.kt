@@ -1,4 +1,4 @@
-package studio.cluvex.aether.model
+﻿package studio.cluvex.aether.model
 
 /**
  * Supported Psiphon egress countries with flags, ISO codes, and localized display names.
@@ -9,9 +9,9 @@ enum class PsiphonRegion(
     val enName: String,
     val faName: String,
 ) {
-    AUTO("AUTO", "⚡", "Fastest Location (Auto)", "سریع‌ترین لوکیشن (خودکار)"),
-    DIRECT("DIRECT", "🛡️", "Direct Cloudflare WARP", "اتصال مستقیم کلودفلر"),
-    US("US", "🇺🇸", "United States", "ایالات متحده آمریکا"),
+    AUTO("AUTO", "⚡", "Fastest Location (Auto)", "سریع‌ترین (خودکار)"),
+    DIRECT("DIRECT", "🌩️", "Direct Cloudflare WARP", "اتصال مستقیم وارپ"),
+    US("US", "🇺🇸", "United States", "ایالات متحده"),
     DE("DE", "🇩🇪", "Germany", "آلمان"),
     GB("GB", "🇬🇧", "United Kingdom", "انگلستان"),
     NL("NL", "🇳🇱", "Netherlands", "هلند"),
@@ -32,7 +32,16 @@ enum class PsiphonRegion(
     RO("RO", "🇷🇴", "Romania", "رومانی"),
     AU("AU", "🇦🇺", "Australia", "استرالیا"),
     IN("IN", "🇮🇳", "India", "هند"),
-    BR("BR", "🇧🇷", "Brazil", "برزیل");
+    BR("BR", "🇧🇷", "Brazil", "برزیل"),
+    // New additions from xPsiphon
+    BG("BG", "🇧🇬", "Bulgaria", "بلغارستان"),
+    CZ("CZ", "🇨🇿", "Czechia", "جمهوری چک"),
+    DK("DK", "🇩🇰", "Denmark", "دانمارک"),
+    EE("EE", "🇪🇪", "Estonia", "استونی"),
+    ID("ID", "🇮🇩", "Indonesia", "اندونزی"),
+    IE("IE", "🇮🇪", "Ireland", "ایرلند"),
+    LT("LT", "🇱🇹", "Lithuania", "لیتوانی"),
+    RS("RS", "🇷🇸", "Serbia", "صربستان");
 
     companion object {
         fun fromCode(code: String?): PsiphonRegion {
