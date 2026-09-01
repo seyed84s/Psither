@@ -96,11 +96,25 @@ fun ConnectButton(
         label = "pulse",
     )
 
-    val rotationAngle by transition.animateFloat(
+    val innerRotation by transition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(1400, easing = LinearEasing)),
+        label = "innerRotation",
+    )
+
+    val middleRotation by transition.animateFloat(
+        initialValue = 360f,
+        targetValue = 0f,
         animationSpec = infiniteRepeatable(tween(2400, easing = LinearEasing)),
-        label = "rotation",
+        label = "middleRotation",
+    )
+
+    val outerRotation by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(3800, easing = LinearEasing)),
+        label = "outerRotation",
     )
 
     val borderAlpha = when (mode) {
@@ -145,7 +159,7 @@ fun ConnectButton(
         if (mode == ButtonMode.BUSY) {
             // Inner fast cyan ring
             Canvas(Modifier.size(196.dp)) {
-                rotate(rotationAngle * 1.8f) {
+                rotate(innerRotation) {
                     drawArc(
                         color = AetherBlue.copy(alpha = 0.95f),
                         startAngle = 30f,
@@ -165,7 +179,7 @@ fun ConnectButton(
 
             // Middle counter-rotating purple ring
             Canvas(Modifier.size(210.dp)) {
-                rotate(-rotationAngle * 1.3f) {
+                rotate(middleRotation) {
                     drawArc(
                         color = AetherCyan,
                         startAngle = 0f,
@@ -178,7 +192,7 @@ fun ConnectButton(
 
             // Outer segmented neon ring
             Canvas(Modifier.size(224.dp)) {
-                rotate(rotationAngle * 0.7f) {
+                rotate(outerRotation) {
                     for (i in 0 until 8) {
                         drawArc(
                             color = AetherBlue.copy(alpha = 0.7f),
