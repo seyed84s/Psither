@@ -22,6 +22,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PowerSettingsNew
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -225,16 +228,17 @@ fun ConnectButton(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                // Official 3D Shield Logo
-                Image(
-                    painter = painterResource(R.drawable.ic_psither_logo),
-                    contentDescription = "Psither Shield",
-                    modifier = Modifier.size(72.dp),
+                // Sleek High-Tech Glowing Power Icon
+                Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Rounded.PowerSettingsNew,
+                    contentDescription = "Connect",
+                    tint = animatedContent,
+                    modifier = Modifier.size(54.dp),
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(10.dp))
                 Text(
                     text = label,
-                    fontSize = 11.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 2.sp,
                     color = animatedContent,
