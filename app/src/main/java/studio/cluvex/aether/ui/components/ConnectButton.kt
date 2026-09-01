@@ -1,25 +1,15 @@
-package studio.cluvex.aether.ui.components
+﻿package studio.cluvex.aether.ui.components
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Autorenew
-import androidx.compose.material.icons.rounded.Bolt
-import androidx.compose.material.icons.rounded.PowerSettingsNew
-import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -32,81 +22,109 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import studio.cluvex.aether.ui.theme.AetherBlue
+import studio.cluvex.aether.ui.theme.AetherError
+import studio.cluvex.aether.ui.theme.AetherMint
+import studio.cluvex.aether.ui.theme.Navy800
 
 enum class ButtonMode { IDLE, BUSY, CONNECTED, ERROR }
 
-/**
- * The centrepiece action: a large circular power button with a glowing halo, an
- * animated progress ring while busy, and colour that reflects the current mode.
- */
 @Composable
 fun ConnectButton(
     mode: ButtonMode,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val accent = when (mode) {
-        ButtonMode.IDLE -> studio.cluvex.aether.ui.theme.AetherBlue
-        ButtonMode.BUSY -> studio.cluvex.aether.ui.theme.AetherBlue
-        ButtonMode.CONNECTED -> studio.cluvex.aether.ui.theme.AetherMint
-        ButtonMode.ERROR -> studio.cluvex.aether.ui.theme.AetherError
+    // True Black & Crimson Elite Vibe
+    val outerRingColor = when (mode) {
+        ButtonMode.IDLE -> AetherError // Crimson ring
+        ButtonMode.BUSY -> AetherBlue // Gold when connecting
+        ButtonMode.CONNECTED -> AetherMint // Bright Gold
+        ButtonMode.ERROR -> AetherError
     }
-    val animatedAccent by animateColorAsState(accent, tween(600), label = "accent")
+    
+    val innerContentColor = when (mode) {
+        ButtonMode.IDLE -> AetherBlue // Gold text
+        ButtonMode.BUSY -> AetherMint
+        ButtonMode.CONNECTED -> AetherMint
+        ButtonMode.ERROR -> AetherError
+    }
+
+    val animatedOuter by animateColorAsState(outerRingColor, tween(600), label = "outer")
+    val animatedInner by animateColorAsState(innerContentColor, tween(600), label = "inner")
 
     val transition = rememberInfiniteTransition(label = "connect")
+    
+    // Smooth spinning for the outer ring when busy
     val sweepRotation by transition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
-        animationSpec = infiniteRepeatable(tween(1100, easing = LinearEasing)),
+        animationSpec = infiniteRepeatable(tween(2000, easing = LinearEasing)),
         label = "sweep",
     )
+    
+    // Intense pulsing for the halo
     val haloPulse by transition.animateFloat(
-        initialValue = 0.92f,
-        targetValue = 1.06f,
-        animationSpec = infiniteRepeatable(tween(1600, easing = LinearEasing), RepeatMode.Reverse),
+        initialValue = 0.85f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(tween(1200, easing = LinearEasing), RepeatMode.Reverse),
         label = "halo",
     )
+    
     val haloScale by animateFloatAsState(
-        targetValue = if (mode == ButtonMode.CONNECTED) haloPulse else 1f,
+        targetValue = if (mode == ButtonMode.CONNECTED || mode == ButtonMode.BUSY) haloPulse else 1f,
         animationSpec = tween(400),
         label = "haloScale",
-    )
-    val iconSpin by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(tween(1400, easing = LinearEasing)),
-        label = "iconSpin",
     )
 
     val interaction = remember { MutableInteractionSource() }
 
-    Box(contentAlignment = Alignment.Center, modifier = modifier.size(220.dp)) {
-        // Soft glowing halo behind the button.
-        Canvas(modifier = Modifier.size(220.dp)) {
+    Box(contentAlignment = Alignment.Center, modifier = modifier.size(240.dp)) {
+        // Outer glowing halo (Crimson or Gold)
+        Canvas(modifier = Modifier.size(240.dp)) {
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(animatedAccent.copy(alpha = 0.45f), Color.Transparent),
+                    colors = listOf(animatedOuter.copy(alpha = 0.40f), Color.Transparent),
                     center = Offset(size.width / 2f, size.height / 2f),
                     radius = size.minDimension / 2f * haloScale,
                 ),
                 radius = size.minDimension / 2f * haloScale,
             )
+            
+            // Sharp outer ring
+            drawCircle(
+                color = animatedOuter.copy(alpha = 0.8f),
+                radius = (size.minDimension / 2f) * 0.75f,
+                style = Stroke(width = 2.dp.toPx())
+            )
+            
+            // If busy, draw a spinner arc on the ring
+            if (mode == ButtonMode.BUSY) {
+                drawArc(
+                    color = Color.White,
+                    startAngle = sweepRotation,
+                    sweepAngle = 120f,
+                    useCenter = false,
+                    style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round),
+                    topLeft = Offset(size.width * 0.125f, size.height * 0.125f),
+                    size = androidx.compose.ui.geometry.Size(size.width * 0.75f, size.height * 0.75f)
+                )
+            }
         }
 
-        // Inner gradient disc.
+        // Inner solid disc
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(150.dp)
+                .size(160.dp)
                 .clip(CircleShape)
                 .background(
-                    Brush.linearGradient(
-                        listOf(
-                            animatedAccent.copy(alpha = 0.28f),
-                            studio.cluvex.aether.ui.theme.Navy800,
-                        ),
-                    ),
+                    Brush.radialGradient(
+                        listOf(Navy800, Color.Black)
+                    )
                 )
                 .clickable(
                     interactionSource = interaction,
@@ -114,32 +132,35 @@ fun ConnectButton(
                     onClick = onClick,
                 ),
         ) {
-            // Progress ring while busy.
-            if (mode == ButtonMode.BUSY) {
-                Canvas(modifier = Modifier.size(132.dp).rotate(sweepRotation)) {
-                    drawArc(
-                        color = animatedAccent,
-                        startAngle = 0f,
-                        sweepAngle = 90f,
-                        useCenter = false,
-                        style = Stroke(width = 6.dp.toPx(), cap = StrokeCap.Round),
-                    )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                // Stylized P logo text
+                Text(
+                    text = "P",
+                    fontSize = 48.sp,
+                    fontWeight = FontWeight.Black,
+                    color = animatedInner,
+                    style = MaterialTheme.typography.displayLarge
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                val label = when (mode) {
+                    ButtonMode.IDLE -> "CONNECT"
+                    ButtonMode.BUSY -> "SECURING..."
+                    ButtonMode.CONNECTED -> "CONNECTED"
+                    ButtonMode.ERROR -> "RETRY"
                 }
+                
+                Text(
+                    text = label,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = animatedInner,
+                    letterSpacing = 2.sp
+                )
             }
-
-            val icon = when (mode) {
-                ButtonMode.CONNECTED -> Icons.Rounded.Bolt
-                ButtonMode.BUSY -> Icons.Rounded.Autorenew
-                else -> Icons.Rounded.PowerSettingsNew
-            }
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = animatedAccent,
-                modifier = Modifier
-                    .size(58.dp)
-                    .then(if (mode == ButtonMode.BUSY) Modifier.rotate(iconSpin) else Modifier),
-            )
         }
     }
 }

@@ -39,6 +39,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import studio.cluvex.aether.R
@@ -121,7 +123,7 @@ fun HomeScreen(
                         color = MaterialTheme.colorScheme.onBackground,
                     )
                     Text(
-                        text = stringResource(R.string.tagline),
+                        text = "Secure your network with elite encryption.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -168,11 +170,13 @@ fun HomeScreen(
             ) {
                 Text(
                     text = stringResource(R.string.app_name),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 4.sp,
+                    color = studio.cluvex.aether.ui.theme.AetherBlue,
                 )
                 Text(
-                    text = stringResource(R.string.tagline),
+                    text = "Secure your network with elite encryption.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -180,16 +184,16 @@ fun HomeScreen(
 
                 Spacer(Modifier.height(16.dp))
 
+                ConnectButton(mode = mode, onClick = onToggleConnection)
+
+                Spacer(Modifier.height(20.dp))
+
                 // Location / Country Selector
                 CountrySelectorButton(
                     region = profile.psiphonRegion,
                     onClick = { showCountrySheet = true },
                     enabled = settingsEnabled,
                 )
-
-                Spacer(Modifier.height(20.dp))
-
-                ConnectButton(mode = mode, onClick = onToggleConnection)
 
                 Spacer(Modifier.height(24.dp))
 
