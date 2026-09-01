@@ -52,7 +52,7 @@ enum class CoreLogLevel(val raw: String) { OFF("off"), ERROR("error"), WARN("war
  */
 data class ConnectionProfile(
     val protocol: Protocol = Protocol.AUTO,
-    val scanMode: ScanMode = ScanMode.BALANCED,
+    val scanMode: ScanMode = ScanMode.TURBO,
     val ipVersion: IpVersion = IpVersion.V4,
     val quickReconnect: Boolean = true,
     val masqueHttp2: Boolean = false,

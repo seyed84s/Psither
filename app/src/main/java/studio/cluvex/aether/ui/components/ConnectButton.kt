@@ -132,17 +132,53 @@ fun ConnectButton(
             }
         }
 
-        // Busy spinner ring (circular, just outside the square)
+        // Busy spinner rings (multiple exciting high-tech rings)
         if (mode == ButtonMode.BUSY) {
+            // Inner fast ring
+            Canvas(Modifier.size(178.dp)) {
+                rotate(rotationAngle * 1.8f) {
+                    drawArc(
+                        color = animatedBorder.copy(alpha = 0.9f),
+                        startAngle = 45f,
+                        sweepAngle = 70f,
+                        useCenter = false,
+                        style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round),
+                    )
+                    drawArc(
+                        color = animatedBorder.copy(alpha = 0.9f),
+                        startAngle = 225f,
+                        sweepAngle = 70f,
+                        useCenter = false,
+                        style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round),
+                    )
+                }
+            }
+            
+            // Middle main counter-rotating ring
             Canvas(Modifier.size(190.dp)) {
-                rotate(rotationAngle) {
+                rotate(-rotationAngle * 1.2f) {
                     drawArc(
                         color = animatedBorder,
                         startAngle = 0f,
-                        sweepAngle = 100f,
+                        sweepAngle = 140f,
                         useCenter = false,
-                        style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round),
+                        style = Stroke(width = 3.5.dp.toPx(), cap = StrokeCap.Round),
                     )
+                }
+            }
+            
+            // Outer segmented ring
+            Canvas(Modifier.size(204.dp)) {
+                rotate(rotationAngle * 0.7f) {
+                    for (i in 0 until 8) {
+                        drawArc(
+                            color = animatedBorder.copy(alpha = 0.6f),
+                            startAngle = i * 45f + 5f,
+                            sweepAngle = 25f,
+                            useCenter = false,
+                            style = Stroke(width = 1.5.dp.toPx(), cap = StrokeCap.Round),
+                        )
+                    }
                 }
             }
         }

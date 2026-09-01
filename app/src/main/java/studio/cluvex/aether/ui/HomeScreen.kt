@@ -228,7 +228,7 @@ private fun ConnectPage(
     LaunchedEffect(connectedSince) {
         if (connectedSince != null) {
             while (true) {
-                elapsed = (SystemClock.elapsedRealtime() - connectedSince) / 1000
+                elapsed = (System.currentTimeMillis() - connectedSince) / 1000
                 delay(1000)
             }
         } else {
