@@ -1,62 +1,27 @@
-package studio.cluvex.aether.ui
+﻿package studio.cluvex.aether.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Menu
-import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
+import androidx.compose.ui.unit.sp
 import studio.cluvex.aether.R
-import studio.cluvex.aether.core.IpEndpoint
 import studio.cluvex.aether.model.ConnectionProfile
 import studio.cluvex.aether.model.ConnectionState
-import studio.cluvex.aether.model.isBusy
-import studio.cluvex.aether.model.isConnected
-import studio.cluvex.aether.ui.components.AmbientBackground
-import studio.cluvex.aether.ui.components.ButtonMode
 import studio.cluvex.aether.ui.components.ConnectButton
-import studio.cluvex.aether.ui.components.ConnectionCard
-import studio.cluvex.aether.ui.components.DiagnosticsPanel
-import studio.cluvex.aether.ui.components.CountrySelectorButton
-import studio.cluvex.aether.ui.components.CountrySelectorSheet
-import studio.cluvex.aether.ui.theme.AetherMint
+import studio.cluvex.aether.ui.components.ButtonMode
+import studio.cluvex.aether.ui.theme.*
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,262 +29,206 @@ fun HomeScreen(
     state: ConnectionState,
     profile: ConnectionProfile,
     connectedSince: Long?,
-    ipInfo: IpEndpoint?,
+    ipInfo: studio.cluvex.aether.model.IpInfo?,
     ipLoading: Boolean,
-    onProfileChange: (ConnectionProfile) -> Unit,
+    settingsEnabled: Boolean,
     onToggleConnection: () -> Unit,
-    modifier: Modifier = Modifier,
+    onProfileChange: (ConnectionProfile) -> Unit,
+    onCheckIp: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val mode = when {
-        state.isConnected -> ButtonMode.CONNECTED
-        state.isBusy -> ButtonMode.BUSY
-        state is ConnectionState.Error -> ButtonMode.ERROR
-        else -> ButtonMode.IDLE
-    }
-
-    val accent = when (mode) {
-        // Brand mint, the same accent the connection card and its animated edge
-        // use, so the whole screen reads as one palette.
-        ButtonMode.CONNECTED -> AetherMint
-        ButtonMode.ERROR -> studio.cluvex.aether.ui.theme.AetherError
-        else -> studio.cluvex.aether.ui.theme.AetherBlue
-    }
-
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val drawerScope = rememberCoroutineScope()
-    // 1.2.2 UI-SPEED FIX: ModalNavigationDrawer composes its drawer content
-    // even while the drawer is CLOSED, so the diagnostics, share, advanced and
-    // about cards were live at all times — recomposing on every profile change
-    // and on every log line, behind a panel nobody was looking at. They are now
-    // only composed while the drawer is open or opening.
-    val drawerVisible = drawerState.isOpen || drawerState.targetValue == DrawerValue.Open
-
-    // Advanced settings, reachable directly from the home screen (top-right).
-    var showAdvancedSheet by remember { mutableStateOf(false) }
-    val advancedSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var currentTab by remember { mutableStateOf(0) }
+    var showSettings by remember { mutableStateOf(false) }
+    var showLocations by remember { mutableStateOf(false) }
     
-    // Country selection
-    var showCountrySheet by remember { mutableStateOf(false) }
-    val countrySheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val settingsEnabled = state is ConnectionState.Idle || state is ConnectionState.Error
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet(
-                drawerContainerColor = MaterialTheme.colorScheme.surface,
-                modifier = Modifier.fillMaxWidth(0.9f),
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        containerColor = Color.Black,
+        bottomBar = {
+            NavigationBar(
+                containerColor = Color(0xFF070707),
+                contentColor = AetherBlue
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .statusBarsPadding()
-                        .padding(horizontal = 16.dp, vertical = 20.dp),
-                ) {
-                    Text(
-                        text = stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onBackground,
+                NavigationBarItem(
+                    icon = { Icon(Icons.Rounded.Home, contentDescription = "Home") },
+                    selected = currentTab == 0,
+                    onClick = { currentTab = 0 },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = AetherBlue,
+                        unselectedIconColor = Color.DarkGray,
+                        indicatorColor = Color.Transparent
                     )
-                    Text(
-                        text = "Secure your network with elite encryption.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                NavigationBarItem(
+                    icon = { Icon(Icons.Rounded.Public, contentDescription = "Locations") },
+                    selected = currentTab == 1,
+                    onClick = { showLocations = true },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = AetherBlue,
+                        unselectedIconColor = Color.DarkGray,
+                        indicatorColor = Color.Transparent
                     )
-
-                    Spacer(Modifier.height(20.dp))
-
-                    if (drawerVisible) {
-                        DiagnosticsPanel()
-
-                        Spacer(Modifier.height(16.dp))
-
-                        SharePanel(
-                            state = state,
-                            profile = profile,
-                            onProfileChange = onProfileChange,
-                        )
-
-                        Spacer(Modifier.height(16.dp))
-
-                        AdvancedPanel(
-                            profile = profile,
-                            onProfileChange = onProfileChange,
-                            enabled = settingsEnabled,
-                        )
-
-                        Spacer(Modifier.height(16.dp))
-
-                        AboutPanel()
-                    }
-                }
-            }
-        },
-    ) {
-        Box(modifier = modifier.fillMaxSize()) {
-            AmbientBackground(accent = accent, active = state.isConnected)
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp, vertical = 32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top,
-            ) {
-                Text(
-                    text = stringResource(R.string.app_name),
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 4.sp,
-                    color = studio.cluvex.aether.ui.theme.AetherBlue,
                 )
-                Text(
-                    text = "Secure your network with elite encryption.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
-
-                Spacer(Modifier.height(16.dp))
-
-                ConnectButton(mode = mode, onClick = onToggleConnection)
-
-                Spacer(Modifier.height(20.dp))
-
-                // Location / Country Selector
-                CountrySelectorButton(
-                    region = profile.psiphonRegion,
-                    onClick = { showCountrySheet = true },
-                    enabled = settingsEnabled,
-                )
-
-                Spacer(Modifier.height(24.dp))
-
-                // 1.2.6: status, timer, IP, speeds and the protocol row used to
-                // be four separate floating surfaces here. They are one unified
-                // glass card now - see ConnectionCard.
-                ConnectionCard(
-                    connected = state.isConnected,
-                    statusTitle = stateTitle(state),
-                    statusCaption = stateSubtitle(state),
-                    connectedSince = connectedSince,
-                    ipInfo = ipInfo,
-                    ipLoading = ipLoading,
-                    error = state is ConnectionState.Error,
-                )
-
-                Spacer(Modifier.height(16.dp))
-            }
-
-            IconButton(
-                onClick = { drawerScope.launch { drawerState.open() } },
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .statusBarsPadding()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Menu,
-                    contentDescription = stringResource(R.string.menu_open),
-                    tint = MaterialTheme.colorScheme.onBackground,
-                )
-            }
-
-            // Advanced settings straight from the home screen.
-            IconButton(
-                onClick = { showAdvancedSheet = true },
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .statusBarsPadding()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Tune,
-                    contentDescription = stringResource(R.string.advanced_open),
-                    tint = MaterialTheme.colorScheme.onBackground,
+                NavigationBarItem(
+                    icon = { Icon(Icons.Rounded.Settings, contentDescription = "Settings") },
+                    selected = currentTab == 2,
+                    onClick = { showSettings = true },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = AetherBlue,
+                        unselectedIconColor = Color.DarkGray,
+                        indicatorColor = Color.Transparent
+                    )
                 )
             }
         }
-    }
-
-    if (showAdvancedSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showAdvancedSheet = false },
-            sheetState = advancedSheetState,
-            containerColor = MaterialTheme.colorScheme.surface,
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(top = 48.dp, bottom = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
+            // Header (Logo + PSITHER)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "P",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Black,
+                    color = AetherBlue
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "PSITHER",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 2.sp,
+                    color = AetherBlue
+                )
+            }
+
+            Spacer(Modifier.height(32.dp))
+
+            // Subtitle
+            val statusColor = if (state.isConnected) AetherMint else AetherError
+            val statusText = when (state) {
+                is ConnectionState.Connected -> "SECURE"
+                is ConnectionState.Idle -> "DISCONNECTED"
+                is ConnectionState.Error -> "CONNECTION FAILED"
+                else -> "CONNECTING..."
+            }
+            Text(
+                text = statusText,
+                color = statusColor,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Secure your network with elite encryption.",
+                color = Color.Gray,
+                fontSize = 12.sp
+            )
+
+            Spacer(Modifier.weight(1f))
+
+            // Massive Central Connect Button
+            val btnMode = when (state) {
+                is ConnectionState.Idle -> ButtonMode.IDLE
+                is ConnectionState.Connected -> ButtonMode.CONNECTED
+                is ConnectionState.Error -> ButtonMode.ERROR
+                else -> ButtonMode.BUSY
+            }
+            ConnectButton(mode = btnMode, onClick = onToggleConnection)
+
+            Spacer(Modifier.weight(1f))
+
+            // Server Selection Card
+            Box(
                 modifier = Modifier
-                    // The advanced card is much taller than a phone screen.
-                    // Give the sheet a bounded viewport and scroll that viewport;
-                    // otherwise Compose measures the whole card and Material's
-                    // bottom sheet clips its lower controls behind the nav bar.
-                    .fillMaxHeight(0.92f)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp)
-                    .navigationBarsPadding()
-                    .padding(bottom = 32.dp),
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color(0xFF0F0F0F))
+                    .clickable(enabled = !state.isConnected) { showLocations = true }
+                    .padding(16.dp)
             ) {
-                // 1.2.2 UI-SPEED FIX: the advanced card is ~40 controls tall and
-                // used to be composed in the SAME frame the sheet starts its
-                // slide-in animation, so the sheet visibly stuttered on open.
-                // The first frame now shows the empty sheet (instant) and the
-                // controls are composed immediately afterwards.
-                var sheetReady by remember { mutableStateOf(false) }
-                LaunchedEffect(Unit) { sheetReady = true }
-                if (sheetReady) {
-                    AdvancedPanel(
-                        profile = profile,
-                        onProfileChange = onProfileChange,
-                        enabled = settingsEnabled,
-                        startExpanded = true,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(Color.DarkGray),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(profile.psiphonRegion.flag, color = Color.White, fontSize = 16.sp)
+                    }
+                    
+                    Spacer(Modifier.width(16.dp))
+                    
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = profile.psiphonRegion.enName,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Row {
+                            Text(if (state.isConnected) "Status: " else "Status: ", color = Color.Gray, fontSize = 12.sp)
+                            Text(if (state.isConnected) "Encrypted" else "Standby", color = if(state.isConnected) AetherMint else Color.Gray, fontSize = 12.sp)
+                        }
+                    }
+                    
+                    Icon(
+                        imageVector = Icons.Rounded.FlashOn,
+                        contentDescription = null,
+                        tint = AetherBlue
                     )
-                } else {
-                    Spacer(Modifier.height(320.dp))
                 }
             }
+            
+            Spacer(Modifier.height(16.dp))
+        }
+
+        if (showSettings) {
+            ModalBottomSheet(
+                onDismissRequest = { showSettings = false },
+                containerColor = Navy800
+            ) {
+                AdvancedPanel(
+                    profile = profile,
+                    onProfileChange = onProfileChange,
+                    enabled = !state.isConnected
+                )
+            }
+        }
+
+        if (showLocations) {
+            studio.cluvex.aether.ui.components.CountrySelectorSheet(
+                selectedRegion = profile.psiphonRegion,
+                onSelectRegion = { newRegion ->
+                    onProfileChange(profile.copy(psiphonRegion = newRegion))
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showLocations = false
+                        }
+                    }
+                },
+                onDismiss = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showLocations = false
+                        }
+                    }
+                },
+                sheetState = sheetState
+            )
         }
     }
-
-    if (showCountrySheet) {
-        CountrySelectorSheet(
-            selectedRegion = profile.psiphonRegion,
-            onSelectRegion = { newRegion ->
-                onProfileChange(
-                    profile.copy(
-                        psiphonRegion = newRegion,
-                        psiphonEnabled = newRegion != studio.cluvex.aether.model.PsiphonRegion.DIRECT,
-                    ),
-                )
-            },
-            onDismiss = { showCountrySheet = false },
-            sheetState = countrySheetState,
-        )
-    }
-}
-
-@Composable
-private fun stateTitle(state: ConnectionState): String = when (state) {
-    is ConnectionState.Idle -> stringResource(R.string.state_idle)
-    is ConnectionState.Launching -> stringResource(R.string.state_launching)
-    is ConnectionState.Connecting -> stringResource(R.string.state_connecting)
-    is ConnectionState.Verifying -> stringResource(R.string.state_verifying)
-    is ConnectionState.Connected -> stringResource(R.string.state_connected)
-    is ConnectionState.Reconnecting -> stringResource(R.string.state_reconnecting)
-    is ConnectionState.Disconnecting -> stringResource(R.string.state_disconnecting)
-    is ConnectionState.Error -> stringResource(R.string.state_error)
-}
-
-@Composable
-private fun stateSubtitle(state: ConnectionState): String = when (state) {
-    is ConnectionState.Idle -> stringResource(R.string.tap_to_connect)
-    // The exit IP + flag is shown inside the card, so keep the subtitle generic
-    // instead of leaking the internal 127.0.0.1:port address.
-    is ConnectionState.Connected -> stringResource(R.string.tap_to_disconnect)
-    is ConnectionState.Reconnecting ->
-        stringResource(R.string.reconnect_attempt, state.attempt, state.maxAttempts)
-    is ConnectionState.Error -> state.message
-    else -> stringResource(R.string.tap_to_disconnect)
 }
