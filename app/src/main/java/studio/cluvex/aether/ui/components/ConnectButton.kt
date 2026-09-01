@@ -47,10 +47,10 @@ fun ConnectButton(
     modifier: Modifier = Modifier,
 ) {
     val accent = when (mode) {
-        ButtonMode.IDLE -> Color(0xFF4C8DFF)
-        ButtonMode.BUSY -> Color(0xFF4C8DFF)
-        ButtonMode.CONNECTED -> Color(0xFF32E0C4)
-        ButtonMode.ERROR -> Color(0xFFFF5C7A)
+        ButtonMode.IDLE -> studio.cluvex.aether.ui.theme.AetherBlue
+        ButtonMode.BUSY -> studio.cluvex.aether.ui.theme.AetherBlue
+        ButtonMode.CONNECTED -> studio.cluvex.aether.ui.theme.AetherMint
+        ButtonMode.ERROR -> studio.cluvex.aether.ui.theme.AetherError
     }
     val animatedAccent by animateColorAsState(accent, tween(600), label = "accent")
 
@@ -104,7 +104,7 @@ fun ConnectButton(
                     Brush.linearGradient(
                         listOf(
                             animatedAccent.copy(alpha = 0.28f),
-                            Color(0xFF0F1626),
+                            studio.cluvex.aether.ui.theme.Navy800,
                         ),
                     ),
                 )

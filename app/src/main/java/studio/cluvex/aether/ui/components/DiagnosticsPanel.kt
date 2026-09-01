@@ -148,19 +148,19 @@ fun DiagnosticsPanel(modifier: Modifier = Modifier) {
 private data class Overall(val color: Color, val captionRes: Int)
 
 private fun overallState(checks: List<ComponentCheck>): Overall = when {
-    checks.isEmpty() -> Overall(Color(0xFF8A93A6), R.string.diag_idle)
-    checks.any { it.state == CheckState.FAIL } -> Overall(Color(0xFFFF5C7A), R.string.diag_problem)
-    checks.all { it.state == CheckState.PASS } -> Overall(Color(0xFF32E0C4), R.string.diag_all_ok)
-    else -> Overall(Color(0xFFF5C451), R.string.diag_idle)
+    checks.isEmpty() -> Overall(studio.cluvex.aether.ui.theme.OnDarkMuted, R.string.diag_idle)
+    checks.any { it.state == CheckState.FAIL } -> Overall(studio.cluvex.aether.ui.theme.AetherError, R.string.diag_problem)
+    checks.all { it.state == CheckState.PASS } -> Overall(studio.cluvex.aether.ui.theme.AetherMint, R.string.diag_all_ok)
+    else -> Overall(studio.cluvex.aether.ui.theme.AetherCyan, R.string.diag_idle)
 }
 
 @Composable
 private fun CheckRow(check: ComponentCheck) {
     val color = when (check.state) {
-        CheckState.PASS -> Color(0xFF32E0C4)
-        CheckState.FAIL -> Color(0xFFFF5C7A)
-        CheckState.RUNNING -> Color(0xFFF5C451)
-        CheckState.PENDING -> Color(0xFF8A93A6)
+        CheckState.PASS -> studio.cluvex.aether.ui.theme.AetherMint
+        CheckState.FAIL -> studio.cluvex.aether.ui.theme.AetherError
+        CheckState.RUNNING -> studio.cluvex.aether.ui.theme.AetherCyan
+        CheckState.PENDING -> studio.cluvex.aether.ui.theme.OnDarkMuted
     }
     Row(
         modifier = Modifier
@@ -206,7 +206,7 @@ private fun LogConsole() {
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 120.dp, max = 260.dp)
-            .background(Color(0xFF0C0F16), RoundedCornerShape(12.dp))
+            .background(studio.cluvex.aether.ui.theme.Navy800, RoundedCornerShape(12.dp))
             .padding(12.dp)
             .verticalScroll(scroll),
     ) {
@@ -214,7 +214,7 @@ private fun LogConsole() {
             Text(
                 text = androidx.compose.ui.res.stringResource(R.string.diag_empty_logs),
                 style = MaterialTheme.typography.bodySmall,
-                color = Color(0xFF8A93A6),
+                color = studio.cluvex.aether.ui.theme.OnDarkMuted,
             )
         } else {
             Column {
@@ -232,10 +232,10 @@ private fun LogConsole() {
 }
 
 private fun logColor(level: LogLevel): Color = when (level) {
-    LogLevel.ERROR -> Color(0xFFFF7A90)
-    LogLevel.WARN -> Color(0xFFF5C451)
-    LogLevel.INFO -> Color(0xFFB8C2D6)
-    LogLevel.DEBUG -> Color(0xFF7C8698)
+    LogLevel.ERROR -> studio.cluvex.aether.ui.theme.AetherError
+    LogLevel.WARN -> studio.cluvex.aether.ui.theme.AetherCyan
+    LogLevel.INFO -> studio.cluvex.aether.ui.theme.OnDark
+    LogLevel.DEBUG -> studio.cluvex.aether.ui.theme.OnDarkMuted
 }
 
 @Composable

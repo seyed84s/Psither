@@ -1,37 +1,33 @@
-package studio.cluvex.aether.ui.theme
+﻿package studio.cluvex.aether.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Deep navy ("سورمه‌ای") dark palette used when dynamic color is unavailable.
-val Navy900 = Color(0xFF0A0E1A)
-val Navy800 = Color(0xFF0F1626)
-val Navy700 = Color(0xFF16203A)
-val Navy600 = Color(0xFF1E2A4A)
+// Stealth Elite true black and charcoal palette.
+val Navy900 = Color(0xFF000000)
+val Navy800 = Color(0xFF070707)
+val Navy700 = Color(0xFF111111)
+val Navy600 = Color(0xFF1A1A1A)
 
-val AetherBlue = Color(0xFF4C8DFF)
-val AetherCyan = Color(0xFF32E0C4)
-val AetherError = Color(0xFFFF5C7A)
+val AetherBlue = Color(0xFFD4AF37) // Luxurious Gold
+val AetherCyan = Color(0xFFF9A825) // Light Gold
+val AetherError = Color(0xFFE53935) // Crimson Red
 
-val OnDark = Color(0xFFE6ECF5)
-val OnDarkMuted = Color(0xFF9AA7BF)
+val OnDark = Color(0xFFEAEAEA)
+val OnDarkMuted = Color(0xFF8A8A8A)
 
-// ---- Brand tokens for the unified connection card (1.2.6) ----
-//
-// The card is pinned to these instead of MaterialTheme, because Material You
-// repaints every themed surface from the user's wallpaper on Android 12+ and
-// that turned the connection card into a colour that was no longer Aether.
+// ---- Brand tokens for the unified connection card ----
 
-/** Mint/teal accent of the connected state. */
-val AetherMint = Color(0xFF3EDBB0)
-/** Second light of the animated card edge, cooler than the mint. */
-val AetherGlowCyan = Color(0xFF35D0E8)
+/** Gold accent of the connected state. */
+val AetherMint = Color(0xFFFFD700)
+/** Second light of the animated card edge (can be crimson or slightly lighter gold). */
+val AetherGlowCyan = Color(0xFFFF4444)
 
-/** Glass card surface: a slate a shade lighter than the navy backdrop. */
-val CardSurfaceTop = Color(0xF01B2542)
-val CardSurfaceBottom = Color(0xF60C1322)
+/** Glass card surface: dark charcoal on true black backdrop. */
+val CardSurfaceTop = Color(0xF0111111)
+val CardSurfaceBottom = Color(0xF6050505)
 /** Every sub-container inside the card (IP pill, speed strip, protocol strip). */
-val CardSubSurface = Color(0xFF151E33)
+val CardSubSurface = Color(0xFF0D0D0D)
 
 val CardTextPrimary = Color(0xFFE8EEF7)
-val CardTextMuted = Color(0xFF8B98B0)
-val CardTextDim = Color(0xFF5E6B84)
+val CardTextMuted = Color(0xFF707070)
+val CardTextDim = Color(0xFF4A4A4A)

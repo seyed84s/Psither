@@ -79,8 +79,8 @@ fun HomeScreen(
         // Brand mint, the same accent the connection card and its animated edge
         // use, so the whole screen reads as one palette.
         ButtonMode.CONNECTED -> AetherMint
-        ButtonMode.ERROR -> Color(0xFFFF5C7A)
-        else -> Color(0xFF4C8DFF)
+        ButtonMode.ERROR -> studio.cluvex.aether.ui.theme.AetherError
+        else -> studio.cluvex.aether.ui.theme.AetherBlue
     }
 
     val drawerState = rememberDrawerState(DrawerValue.Closed)

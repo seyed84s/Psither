@@ -13,11 +13,11 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 // Fallback scheme: a stunning navy dark theme for devices below Android 12.
-private val AetherDarkColorScheme = darkColorScheme(
+private val PsitherDarkColorScheme = darkColorScheme(
     primary = AetherBlue,
-    onPrimary = Color.White,
+    onPrimary = Color.Black, // Gold looks better with black text
     secondary = AetherCyan,
-    onSecondary = Color(0xFF04211C),
+    onSecondary = Color.Black,
     tertiary = AetherCyan,
     background = Navy900,
     onBackground = OnDark,
@@ -31,17 +31,11 @@ private val AetherDarkColorScheme = darkColorScheme(
 )
 
 /**
- * Material You: uses the wallpaper-derived dynamic dark palette on Android 12+,
- * and falls back to the navy scheme otherwise. Always dark by design.
+ * Custom Stealth Elite theme. Always dark by design. Disables dynamic colors to enforce branding.
  */
 @Composable
 fun AetherTheme(content: @Composable () -> Unit) {
-    val context = LocalContext.current
-    val colorScheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        dynamicDarkColorScheme(context)
-    } else {
-        AetherDarkColorScheme
-    }
+    val colorScheme = PsitherDarkColorScheme
 
     val view = LocalView.current
     if (!view.isInEditMode) {

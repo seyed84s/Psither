@@ -682,10 +682,10 @@ private fun formatRate(v: Long): String = formatBytes(v) + "/s"
 private val CARD_RADIUS = 26.dp
 private val CARD_SHAPE = RoundedCornerShape(CARD_RADIUS)
 private val SUB_SHAPE = RoundedCornerShape(18.dp)
-private val SUB_BORDER = Color(0x1F3EDBB0)
+private val SUB_BORDER = studio.cluvex.aether.ui.theme.AetherMint.copy(alpha = 0.12f)
 private val DIVIDER = Color(0x1FFFFFFF)
-private val IDLE_ACCENT = Color(0xFF4C8DFF)
-private val ERROR_ACCENT = Color(0xFFFF5C7A)
+private val IDLE_ACCENT = studio.cluvex.aether.ui.theme.AetherBlue
+private val ERROR_ACCENT = studio.cluvex.aether.ui.theme.AetherError
 private const val GLOW_TRAVEL_MS = 5_200
 private const val LATENCY_REFRESH_MS = 4_000L
 private const val TWO_PI = 6.2831855f
