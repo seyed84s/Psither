@@ -77,6 +77,7 @@
     <string name="about_port_title">Psither Project</string>
     <string name="about_port_note">A high-speed revolution in VPN chaining</string>
     <string name="about_core_version">Engine (core) version %1$s</string>
+    <string name="menu_open">Open menu</string>
     <string name="advanced_open">Open advanced settings</string>
 
     <!-- Quick Settings tile -->
