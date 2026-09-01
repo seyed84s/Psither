@@ -2,32 +2,35 @@ package studio.cluvex.aether.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Vibrant, energetic deep space and cyberpunk palette.
-val Navy900 = Color(0xFF090B14) // Deep space indigo/black
-val Navy800 = Color(0xFF101426) // Dark neon blue
-val Navy700 = Color(0xFF1A1F3B) // Surface neon blue
-val Navy600 = Color(0xFF272F55) // Lighter surface
+// ═══════════════════════════════════════════════════════════════
+//  PSITHER MODERN NEON & ENERGETIC PALETTE (Inspired by Logo)
+// ═══════════════════════════════════════════════════════════════
 
-val AetherBlue = Color(0xFF00E5FF) // Neon Cyan (IDLE)
-val AetherCyan = Color(0xFFFF007F) // Neon Pink (BUSY)
-val AetherError = Color(0xFFFF1744) // Neon Red (ERROR)
+val Navy900 = Color(0xFF0A0E1A) // Deep Midnight Indigo (Rich, vibrant dark background)
+val Navy800 = Color(0xFF111827) // Midnight Slate Surface
+val Navy700 = Color(0xFF1A2234) // Elevated Glass Surface
+val Navy600 = Color(0xFF28344E) // Border & Outline
 
-val OnDark = Color(0xFFFFFFFF)
-val OnDarkMuted = Color(0xFFA0AEC0)
+val AetherBlue = Color(0xFF00E5FF) // Electric Shield Cyan (Primary Brand)
+val AetherCyan = Color(0xFFA855F7) // Royal Neon Purple (Scanning / Dynamic)
+val AetherError = Color(0xFFFF3366) // Vibrant Coral Red (Error)
+
+val OnDark = Color(0xFFF8FAFC)
+val OnDarkMuted = Color(0xFF94A3B8)
 
 // ---- Brand tokens for the unified connection card ----
 
-/** Vibrant Mint green accent of the connected state. */
+/** Cyber Mint Green accent of the connected state. */
 val AetherMint = Color(0xFF00E676)
-/** Electric purple glow for the animated card edge. */
-val AetherGlowCyan = Color(0xFFD500F9)
+/** Electric Purple & Amber glow accents. */
+val AetherGlowCyan = Color(0xFF6366F1)
+val AetherGold = Color(0xFFF59E0B)
 
-/** Glass card surface: vibrant deep blue with slight transparency. */
-val CardSurfaceTop = Color(0xF01A1F3B)
-val CardSurfaceBottom = Color(0xF6101426)
-/** Every sub-container inside the card (IP pill, speed strip, protocol strip). */
-val CardSubSurface = Color(0xFF151930)
+/** Modern Glass card surfaces */
+val CardSurfaceTop = Color(0xF01E293B)
+val CardSurfaceBottom = Color(0xF6111827)
+val CardSubSurface = Color(0xFF151E2E)
 
 val CardTextPrimary = Color(0xFFFFFFFF)
-val CardTextMuted = Color(0xFF8B9BB4)
+val CardTextMuted = Color(0xFF94A3B8)
 val CardTextDim = Color(0xFF64748B)

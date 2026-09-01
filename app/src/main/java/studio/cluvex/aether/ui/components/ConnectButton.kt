@@ -9,6 +9,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,20 +35,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import studio.cluvex.aether.R
 import studio.cluvex.aether.ui.theme.AetherBlue
 import studio.cluvex.aether.ui.theme.AetherCyan
 import studio.cluvex.aether.ui.theme.AetherError
 import studio.cluvex.aether.ui.theme.AetherMint
 import studio.cluvex.aether.ui.theme.Navy700
+import studio.cluvex.aether.ui.theme.Navy800
+import studio.cluvex.aether.ui.theme.Navy900
 
 enum class ButtonMode { IDLE, BUSY, CONNECTED, ERROR }
 
 /**
- * Stealth Elite connect button — a large rounded square with an animated gold/crimson
- * border, a glowing "P" logo in the centre, and a circular spinner overlay when busy.
+ * Modern 3D shield connect button with energetic multi-ring scanning animation,
+ * glowing neon halos, and crisp glassmorphic surfaces.
  */
 @Composable
 fun ConnectButton(
@@ -70,10 +75,10 @@ fun ConnectButton(
     }
 
     val label = when (mode) {
-        ButtonMode.IDLE -> "CONNECT"
-        ButtonMode.BUSY -> "SECURING"
-        ButtonMode.CONNECTED -> "SECURED"
-        ButtonMode.ERROR -> "RETRY"
+        ButtonMode.IDLE -> "TAP TO CONNECT"
+        ButtonMode.BUSY -> "SECURING..."
+        ButtonMode.CONNECTED -> "SECURED & ACTIVE"
+        ButtonMode.ERROR -> "CONNECTION FAILED"
     }
 
     val animatedBorder by animateColorAsState(borderColor, tween(500), label = "border")
@@ -82,7 +87,7 @@ fun ConnectButton(
     val transition = rememberInfiniteTransition(label = "btn")
 
     val pulseAlpha by transition.animateFloat(
-        initialValue = 0.55f,
+        initialValue = 0.6f,
         targetValue = 1.0f,
         animationSpec = infiniteRepeatable(tween(1200), RepeatMode.Reverse),
         label = "pulse",
@@ -91,75 +96,75 @@ fun ConnectButton(
     val rotationAngle by transition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
-        animationSpec = infiniteRepeatable(tween(2200, easing = LinearEasing)),
+        animationSpec = infiniteRepeatable(tween(2400, easing = LinearEasing)),
         label = "rotation",
     )
 
     val borderAlpha = when (mode) {
         ButtonMode.CONNECTED -> pulseAlpha
         ButtonMode.BUSY -> pulseAlpha
-        ButtonMode.IDLE -> 0.45f
-        ButtonMode.ERROR -> 0.85f
+        ButtonMode.IDLE -> 0.75f
+        ButtonMode.ERROR -> 0.9f
     }
 
     val glowRadius by animateFloatAsState(
         targetValue = when (mode) {
-            ButtonMode.CONNECTED -> 1.15f
-            ButtonMode.BUSY -> 0.95f
-            else -> 0f
+            ButtonMode.CONNECTED -> 1.25f
+            ButtonMode.BUSY -> 1.05f
+            else -> 0.85f
         },
         animationSpec = tween(600),
         label = "glow",
     )
 
     val interaction = remember { MutableInteractionSource() }
-    val shape = RoundedCornerShape(36.dp)
+    val shape = RoundedCornerShape(40.dp)
 
-    Box(contentAlignment = Alignment.Center, modifier = modifier.size(210.dp)) {
-        // Outer glow
-        if (glowRadius > 0f) {
-            Canvas(Modifier.fillMaxSize()) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            animatedBorder.copy(alpha = 0.28f * pulseAlpha),
-                            Color.Transparent,
-                        ),
-                        center = Offset(size.width / 2f, size.height / 2f),
-                        radius = size.minDimension / 2f * glowRadius,
+    Box(contentAlignment = Alignment.Center, modifier = modifier.size(230.dp)) {
+        // Multi-color dynamic ambient radial halo
+        Canvas(Modifier.fillMaxSize()) {
+            val centerOffset = Offset(size.width / 2f, size.height / 2f)
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        animatedBorder.copy(alpha = 0.35f * pulseAlpha),
+                        AetherCyan.copy(alpha = 0.12f * pulseAlpha),
+                        Color.Transparent,
                     ),
-                    radius = size.minDimension / 2f * glowRadius,
-                )
-            }
+                    center = centerOffset,
+                    radius = (size.minDimension / 2f) * glowRadius,
+                ),
+                radius = (size.minDimension / 2f) * glowRadius,
+            )
         }
 
-        // Busy spinner rings (multiple exciting high-tech rings)
+        // Futuristic Multi-Ring Scanning Rings (when BUSY)
         if (mode == ButtonMode.BUSY) {
-            // Inner fast ring
-            Canvas(Modifier.size(178.dp)) {
+            // Inner fast cyan ring
+            Canvas(Modifier.size(196.dp)) {
                 rotate(rotationAngle * 1.8f) {
                     drawArc(
-                        color = animatedBorder.copy(alpha = 0.9f),
-                        startAngle = 45f,
-                        sweepAngle = 70f,
+                        color = AetherBlue.copy(alpha = 0.95f),
+                        startAngle = 30f,
+                        sweepAngle = 75f,
                         useCenter = false,
-                        style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round),
+                        style = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round),
                     )
                     drawArc(
-                        color = animatedBorder.copy(alpha = 0.9f),
-                        startAngle = 225f,
-                        sweepAngle = 70f,
+                        color = AetherBlue.copy(alpha = 0.95f),
+                        startAngle = 210f,
+                        sweepAngle = 75f,
                         useCenter = false,
-                        style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round),
+                        style = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round),
                     )
                 }
             }
-            
-            // Middle main counter-rotating ring
-            Canvas(Modifier.size(190.dp)) {
-                rotate(-rotationAngle * 1.2f) {
+
+            // Middle counter-rotating purple ring
+            Canvas(Modifier.size(210.dp)) {
+                rotate(-rotationAngle * 1.3f) {
                     drawArc(
-                        color = animatedBorder,
+                        color = AetherCyan,
                         startAngle = 0f,
                         sweepAngle = 140f,
                         useCenter = false,
@@ -167,36 +172,48 @@ fun ConnectButton(
                     )
                 }
             }
-            
-            // Outer segmented ring
-            Canvas(Modifier.size(204.dp)) {
+
+            // Outer segmented neon ring
+            Canvas(Modifier.size(224.dp)) {
                 rotate(rotationAngle * 0.7f) {
                     for (i in 0 until 8) {
                         drawArc(
-                            color = animatedBorder.copy(alpha = 0.6f),
-                            startAngle = i * 45f + 5f,
-                            sweepAngle = 25f,
+                            color = AetherBlue.copy(alpha = 0.7f),
+                            startAngle = i * 45f + 6f,
+                            sweepAngle = 26f,
                             useCenter = false,
-                            style = Stroke(width = 1.5.dp.toPx(), cap = StrokeCap.Round),
+                            style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round),
                         )
                     }
                 }
             }
         }
 
-        // Main button body — rounded square
+        // Main button body — modern glassmorphic rounded square with gradient & badge
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(170.dp)
+                .size(176.dp)
                 .clip(shape)
                 .border(
                     width = 2.5.dp,
-                    color = animatedBorder.copy(alpha = borderAlpha),
+                    brush = Brush.sweepGradient(
+                        listOf(
+                            animatedBorder.copy(alpha = borderAlpha),
+                            AetherCyan.copy(alpha = borderAlpha * 0.8f),
+                            animatedBorder.copy(alpha = borderAlpha),
+                        ),
+                    ),
                     shape = shape,
                 )
                 .background(
-                    Brush.radialGradient(listOf(Navy700, Color.Black)),
+                    Brush.verticalGradient(
+                        listOf(
+                            Color(0xFF1E293B),
+                            Color(0xFF0F172A),
+                            Navy900,
+                        ),
+                    ),
                 )
                 .clickable(
                     interactionSource = interaction,
@@ -208,19 +225,19 @@ fun ConnectButton(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                Text(
-                    text = "P",
-                    fontSize = 56.sp,
-                    fontWeight = FontWeight.Black,
-                    color = animatedContent,
+                // Official 3D Shield Logo
+                Image(
+                    painter = painterResource(R.drawable.ic_psither_logo),
+                    contentDescription = "Psither Shield",
+                    modifier = Modifier.size(72.dp),
                 )
-                Spacer(Modifier.height(2.dp))
+                Spacer(Modifier.height(8.dp))
                 Text(
                     text = label,
                     fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 3.sp,
-                    color = animatedContent.copy(alpha = 0.75f),
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 2.sp,
+                    color = animatedContent,
                 )
             }
         }

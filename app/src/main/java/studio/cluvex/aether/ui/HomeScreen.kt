@@ -1,6 +1,5 @@
 package studio.cluvex.aether.ui
 
-import android.os.SystemClock
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -8,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,9 +35,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,6 +55,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -70,11 +73,15 @@ import studio.cluvex.aether.ui.components.ButtonMode
 import studio.cluvex.aether.ui.components.ConnectButton
 import studio.cluvex.aether.ui.components.DiagnosticsPanel
 import studio.cluvex.aether.ui.theme.AetherBlue
+import studio.cluvex.aether.ui.theme.AetherCyan
 import studio.cluvex.aether.ui.theme.AetherError
 import studio.cluvex.aether.ui.theme.AetherMint
+import studio.cluvex.aether.ui.theme.Navy700
+import studio.cluvex.aether.ui.theme.Navy800
+import studio.cluvex.aether.ui.theme.Navy900
 
 // ═══════════════════════════════════════════════════════════════
-//  ROOT — tab-based navigation, NO drawer, NO bottom sheets
+//  ROOT — Modern 3-Tab Architecture with energetic ambient vibe
 // ═══════════════════════════════════════════════════════════════
 
 @Composable
@@ -93,7 +100,7 @@ fun HomeScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = Color.Black,
+        containerColor = Navy900,
         bottomBar = {
             PsitherBottomBar(
                 selectedTab = selectedTab,
@@ -137,7 +144,7 @@ fun HomeScreen(
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  BOTTOM NAV — custom dark bar with gold accent
+//  BOTTOM NAV — Modern Frosted Glass Bar
 // ═══════════════════════════════════════════════════════════════
 
 @Composable
@@ -145,18 +152,34 @@ private fun PsitherBottomBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF050505))
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        Color(0xEE111827),
+                        Color(0xFF0A0E1A),
+                    ),
+                ),
+            )
             .navigationBarsPadding(),
     ) {
         Box(
             Modifier
                 .fillMaxWidth()
-                .height(0.5.dp)
-                .background(AetherBlue.copy(alpha = 0.25f))
+                .height(1.dp)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(
+                            Color.Transparent,
+                            AetherBlue.copy(alpha = 0.5f),
+                            AetherCyan.copy(alpha = 0.5f),
+                            Color.Transparent,
+                        ),
+                    ),
+                )
                 .align(Alignment.TopCenter),
         )
         Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -174,24 +197,28 @@ private fun PsitherTab(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
+    val activeColor = AetherBlue
+    val inactiveColor = Color(0xFF64748B)
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 20.dp, vertical = 4.dp),
+            .padding(horizontal = 24.dp, vertical = 6.dp),
     ) {
         Icon(
             imageVector = icon,
             contentDescription = label,
-            tint = if (selected) AetherBlue else Color.Gray,
+            tint = if (selected) activeColor else inactiveColor,
             modifier = Modifier.size(24.dp),
         )
-        Spacer(Modifier.height(3.dp))
+        Spacer(Modifier.height(4.dp))
         Text(
             text = label,
-            fontSize = 10.sp,
-            color = if (selected) AetherBlue else Color.Gray,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+            fontSize = 11.sp,
+            color = if (selected) activeColor else inactiveColor,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
         )
     }
 }
@@ -219,6 +246,7 @@ private fun ConnectPage(
     val accentColor = when (mode) {
         ButtonMode.CONNECTED -> AetherMint
         ButtonMode.ERROR -> AetherError
+        ButtonMode.BUSY -> AetherCyan
         else -> AetherBlue
     }
     val animatedAccent by animateColorAsState(accentColor, tween(600), label = "accent")
@@ -237,14 +265,53 @@ private fun ConnectPage(
     }
 
     Box(Modifier.fillMaxSize()) {
-        // Background glow
+        // Multi-point energetic ambient mesh background
         Canvas(Modifier.fillMaxSize()) {
-            drawRect(Color.Black)
+            // Base dark gradient
+            drawRect(
+                brush = Brush.verticalGradient(
+                    listOf(
+                        Color(0xFF0F172A),
+                        Color(0xFF0A0E1A),
+                        Color(0xFF060913),
+                    ),
+                ),
+            )
+
+            // Dynamic top-center spotlight
             drawCircle(
                 brush = Brush.radialGradient(
-                    listOf(animatedAccent.copy(alpha = 0.07f), Color.Transparent),
-                    center = Offset(size.width / 2f, size.height * 0.35f),
-                    radius = size.minDimension * 0.9f,
+                    colors = listOf(
+                        animatedAccent.copy(alpha = 0.18f),
+                        AetherCyan.copy(alpha = 0.08f),
+                        Color.Transparent,
+                    ),
+                    center = Offset(size.width * 0.5f, size.height * 0.42f),
+                    radius = size.minDimension * 0.85f,
+                ),
+            )
+
+            // Top-left cyan ambient glow
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        AetherBlue.copy(alpha = 0.12f),
+                        Color.Transparent,
+                    ),
+                    center = Offset(size.width * 0.15f, size.height * 0.12f),
+                    radius = size.minDimension * 0.5f,
+                ),
+            )
+
+            // Bottom-right purple ambient glow
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        AetherCyan.copy(alpha = 0.10f),
+                        Color.Transparent,
+                    ),
+                    center = Offset(size.width * 0.85f, size.height * 0.75f),
+                    radius = size.minDimension * 0.6f,
                 ),
             )
         }
@@ -253,104 +320,176 @@ private fun ConnectPage(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(Modifier.height(28.dp))
+            Spacer(Modifier.height(16.dp))
 
-            // Logo
-            Text("P", fontSize = 38.sp, fontWeight = FontWeight.Black, color = AetherBlue)
-            Text(
-                "PSITHER",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 8.sp,
-                color = AetherBlue.copy(alpha = 0.6f),
-            )
-
-            Spacer(Modifier.height(24.dp))
-
-            // Status
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                val dotTr = rememberInfiniteTransition(label = "dot")
-                val dotAlpha by dotTr.animateFloat(
-                    0.3f, 1f,
-                    infiniteRepeatable(tween(900), RepeatMode.Reverse),
-                    label = "da",
+            // Header with 3D Shield Logo
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.ic_psither_logo),
+                    contentDescription = "Psither Logo",
+                    modifier = Modifier.size(44.dp),
                 )
-                Box(
-                    Modifier
-                        .size(10.dp)
-                        .clip(CircleShape)
-                        .background(animatedAccent.copy(alpha = if (state.isBusy) dotAlpha else 1f)),
-                )
-                Spacer(Modifier.width(10.dp))
-                Text(
-                    stateTitle(state).uppercase(),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 2.sp,
-                    color = animatedAccent,
-                )
+                Spacer(Modifier.width(12.dp))
+                Column {
+                    Text(
+                        "PSITHER",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 4.sp,
+                        color = Color.White,
+                    )
+                    Text(
+                        "NEXT-GEN VPN CLIENT",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp,
+                        color = AetherBlue,
+                    )
+                }
             }
-            Spacer(Modifier.height(4.dp))
-            Text(stateSubtitle(state), fontSize = 12.sp, color = Color.Gray)
+
+            Spacer(Modifier.height(20.dp))
+
+            // Status Pill Badge
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color(0xFF1E293B).copy(alpha = 0.85f))
+                    .border(1.dp, animatedAccent.copy(alpha = 0.4f), RoundedCornerShape(20.dp))
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    val dotTr = rememberInfiniteTransition(label = "dot")
+                    val dotAlpha by dotTr.animateFloat(
+                        0.3f, 1f,
+                        infiniteRepeatable(tween(800), RepeatMode.Reverse),
+                        label = "da",
+                    )
+                    Box(
+                        Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(animatedAccent.copy(alpha = if (state.isBusy) dotAlpha else 1f)),
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Text(
+                        stateTitle(state).uppercase(),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.5.sp,
+                        color = animatedAccent,
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(6.dp))
+            Text(
+                stateSubtitle(state),
+                fontSize = 12.sp,
+                color = Color(0xFF94A3B8),
+                fontWeight = FontWeight.Medium,
+            )
 
             // Button
             Spacer(Modifier.weight(1f))
             ConnectButton(mode = mode, onClick = onToggleConnection)
             Spacer(Modifier.weight(0.5f))
 
-            // Stats strip
+            // Live Connection Stats Strip
             if (state.isConnected) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFF0A0A0A))
-                        .border(1.dp, AetherMint.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color(0xFF1E293B).copy(alpha = 0.9f),
+                                    Color(0xFF111827).copy(alpha = 0.9f),
+                                ),
+                            ),
+                        )
+                        .border(1.dp, AetherMint.copy(alpha = 0.35f), RoundedCornerShape(20.dp))
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    StatCell("DURATION", "%02d:%02d:%02d".format(elapsed / 3600, (elapsed % 3600) / 60, elapsed % 60), Color.White)
-                    Box(Modifier.width(1.dp).height(36.dp).background(Color.DarkGray))
-                    StatCell("EXIT IP", if (ipLoading) "..." else ipInfo?.ip ?: "--", Color.White)
-                    Box(Modifier.width(1.dp).height(36.dp).background(Color.DarkGray))
-                    StatCell("COUNTRY", ipInfo?.countryCode ?: "--", AetherMint)
+                    StatCell(
+                        "DURATION",
+                        "%02d:%02d:%02d".format(elapsed / 3600, (elapsed % 3600) / 60, elapsed % 60),
+                        Color.White,
+                    )
+                    Box(Modifier.width(1.dp).height(36.dp).background(Color(0xFF334155)))
+                    StatCell("TUNNEL IP", if (ipLoading) "..." else ipInfo?.ip ?: "--", AetherBlue)
+                    Box(Modifier.width(1.dp).height(36.dp).background(Color(0xFF334155)))
+                    StatCell("EGRESS", ipInfo?.countryCode ?: "--", AetherMint)
                 }
                 Spacer(Modifier.height(14.dp))
             }
 
-            // Server card
+            // Server Selector Card (Glassmorphic)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF0A0A0A))
-                    .border(1.dp, AetherBlue.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                Color(0xFF1E293B).copy(alpha = 0.85f),
+                                Color(0xFF111827).copy(alpha = 0.85f),
+                            ),
+                        ),
+                    )
+                    .border(
+                        1.dp,
+                        Brush.horizontalGradient(
+                            listOf(
+                                AetherBlue.copy(alpha = 0.4f),
+                                AetherCyan.copy(alpha = 0.2f),
+                            ),
+                        ),
+                        RoundedCornerShape(20.dp),
+                    )
                     .clickable { onOpenServers() }
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                    .padding(horizontal = 18.dp, vertical = 14.dp),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(profile.psiphonRegion.flag, fontSize = 28.sp)
+                    Text(profile.psiphonRegion.flag, fontSize = 30.sp)
                     Spacer(Modifier.width(14.dp))
                     Column(Modifier.weight(1f)) {
                         Text(
                             profile.psiphonRegion.enName,
                             fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold,
+                            fontWeight = FontWeight.Bold,
                             color = Color.White,
                         )
-                        Text(
-                            if (profile.psiphonEnabled) "Psiphon Chained" else "Direct WARP",
-                            fontSize = 12.sp,
-                            color = if (profile.psiphonEnabled) AetherMint else Color.Gray,
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Rounded.Shield,
+                                contentDescription = null,
+                                tint = if (profile.psiphonEnabled) AetherMint else AetherBlue,
+                                modifier = Modifier.size(12.dp),
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                if (profile.psiphonEnabled) "Psiphon Multi-Hop" else "Direct WARP Tunnel",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = if (profile.psiphonEnabled) AetherMint else AetherBlue,
+                            )
+                        }
                     }
-                    Text("\u25B8", fontSize = 20.sp, color = AetherBlue)
+                    Text("CHANGE ▸", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = AetherBlue)
                 }
             }
             Spacer(Modifier.height(16.dp))
@@ -361,14 +500,14 @@ private fun ConnectPage(
 @Composable
 private fun StatCell(label: String, value: String, valueColor: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(label, fontSize = 10.sp, color = Color.Gray, letterSpacing = 1.sp)
+        Text(label, fontSize = 10.sp, color = Color(0xFF94A3B8), fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
         Spacer(Modifier.height(4.dp))
-        Text(value, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = valueColor)
+        Text(value, fontSize = 14.sp, fontWeight = FontWeight.Black, color = valueColor)
     }
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  TAB 1 — SERVERS PAGE (full-screen country grid)
+//  TAB 1 — SERVERS PAGE (Modern 2-column country grid)
 // ═══════════════════════════════════════════════════════════════
 
 @Composable
@@ -394,18 +533,37 @@ private fun ServersPage(
             .statusBarsPadding()
             .padding(horizontal = 20.dp),
     ) {
-        Spacer(Modifier.height(20.dp))
-        Text("LOCATIONS", fontSize = 22.sp, fontWeight = FontWeight.Black, letterSpacing = 4.sp, color = AetherBlue)
+        Spacer(Modifier.height(16.dp))
+        Text(
+            "SERVER LOCATIONS",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 2.sp,
+            color = Color.White,
+        )
         Spacer(Modifier.height(4.dp))
-        Text("Select your exit country", fontSize = 13.sp, color = Color.Gray)
+        Text(
+            "Select your exit node for automatic chaining",
+            fontSize = 13.sp,
+            color = Color(0xFF94A3B8),
+        )
         Spacer(Modifier.height(16.dp))
 
         OutlinedTextField(
             value = query,
             onValueChange = { query = it },
-            placeholder = { Text("Search...", color = Color.Gray) },
-            leadingIcon = { Icon(Icons.Rounded.Search, null, tint = Color.Gray) },
+            placeholder = { Text("Search country or code...", color = Color(0xFF64748B)) },
+            leadingIcon = { Icon(Icons.Rounded.Search, null, tint = AetherBlue) },
             singleLine = true,
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Color(0xFF1E293B),
+                unfocusedContainerColor = Color(0xFF111827),
+                focusedBorderColor = AetherBlue,
+                unfocusedBorderColor = Color(0xFF334155),
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+            ),
             modifier = Modifier.fillMaxWidth(),
         )
 
@@ -432,36 +590,65 @@ private fun CountryCard(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
+    val activeBorder = Brush.horizontalGradient(listOf(AetherBlue, AetherCyan))
+    val inactiveBorder = Brush.horizontalGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
-            .border(
-                if (selected) 2.dp else 1.dp,
-                if (selected) AetherBlue else Color(0xFF1A1A1A),
-                RoundedCornerShape(16.dp),
+            .clip(RoundedCornerShape(18.dp))
+            .background(
+                if (selected) {
+                    Brush.verticalGradient(
+                        listOf(
+                            AetherBlue.copy(alpha = 0.18f),
+                            Color(0xFF1E293B),
+                        ),
+                    )
+                } else {
+                    Brush.verticalGradient(
+                        listOf(
+                            Color(0xFF1E293B).copy(alpha = 0.7f),
+                            Color(0xFF0F172A).copy(alpha = 0.7f),
+                        ),
+                    )
+                },
             )
-            .background(if (selected) AetherBlue.copy(alpha = 0.08f) else Color(0xFF0A0A0A))
+            .border(
+                width = if (selected) 2.dp else 1.dp,
+                brush = if (selected) activeBorder else inactiveBorder,
+                shape = RoundedCornerShape(18.dp),
+            )
             .clickable(onClick = onClick)
-            .padding(vertical = 16.dp, horizontal = 8.dp),
+            .padding(vertical = 16.dp, horizontal = 10.dp),
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(region.flag, fontSize = 32.sp)
+            Text(region.flag, fontSize = 34.sp)
             Spacer(Modifier.height(8.dp))
             Text(
                 region.enName,
-                fontSize = 12.sp,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                color = if (selected) AetherBlue else Color.White,
+                fontSize = 13.sp,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                color = if (selected) Color.White else Color(0xFFCBD5E1),
                 textAlign = TextAlign.Center,
                 maxLines = 2,
             )
+            if (selected) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "SELECTED",
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp,
+                    color = AetherBlue,
+                )
+            }
         }
     }
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  TAB 2 — SETTINGS PAGE (full-screen, all panels)
+//  TAB 2 — SETTINGS PAGE
 // ═══════════════════════════════════════════════════════════════
 
 @Composable
@@ -478,25 +665,35 @@ private fun SettingsPage(
             .statusBarsPadding()
             .padding(horizontal = 16.dp),
     ) {
-        Spacer(Modifier.height(20.dp))
-        Text("SETTINGS", fontSize = 22.sp, fontWeight = FontWeight.Black, letterSpacing = 4.sp, color = AetherBlue)
+        Spacer(Modifier.height(16.dp))
+        Text(
+            "SETTINGS & TOOLS",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 2.sp,
+            color = Color.White,
+        )
         Spacer(Modifier.height(4.dp))
-        Text("Configure your connection", fontSize = 13.sp, color = Color.Gray)
+        Text(
+            "Configure protocol parameters and diagnostics",
+            fontSize = 13.sp,
+            color = Color(0xFF94A3B8),
+        )
         Spacer(Modifier.height(20.dp))
 
-        SectionHeader("ADVANCED")
+        SectionHeader("ADVANCED CONFIG")
         AdvancedPanel(profile = profile, onProfileChange = onProfileChange, enabled = enabled, startExpanded = true)
 
         Spacer(Modifier.height(16.dp))
-        SectionHeader("DIAGNOSTICS")
+        SectionHeader("SYSTEM DIAGNOSTICS")
         DiagnosticsPanel()
 
         Spacer(Modifier.height(16.dp))
-        SectionHeader("SHARING")
+        SectionHeader("NETWORK SHARING")
         SharePanel(state = state, profile = profile, onProfileChange = onProfileChange)
 
         Spacer(Modifier.height(16.dp))
-        SectionHeader("ABOUT")
+        SectionHeader("ABOUT PSITHER")
         AboutPanel()
 
         Spacer(Modifier.height(32.dp))
@@ -507,18 +704,18 @@ private fun SettingsPage(
 private fun SectionHeader(title: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(vertical = 8.dp),
+        modifier = Modifier.padding(vertical = 10.dp),
     ) {
-        Box(Modifier.weight(1f).height(1.dp).background(AetherBlue.copy(alpha = 0.3f)))
+        Box(Modifier.weight(1f).height(1.dp).background(AetherBlue.copy(alpha = 0.25f)))
         Text(
             title,
             fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
-            letterSpacing = 3.sp,
-            color = AetherBlue.copy(alpha = 0.6f),
+            letterSpacing = 2.sp,
+            color = AetherBlue,
             modifier = Modifier.padding(horizontal = 12.dp),
         )
-        Box(Modifier.weight(1f).height(1.dp).background(AetherBlue.copy(alpha = 0.3f)))
+        Box(Modifier.weight(1f).height(1.dp).background(AetherBlue.copy(alpha = 0.25f)))
     }
 }
 
