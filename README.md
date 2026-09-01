@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" width="128" alt="Psither Logo">
+  <img src="assets/logo.png" width="128" alt="Psither Logo">
   <h1>Psither</h1>
   <p><strong>A Next-Generation, High-Speed VPN Client for Android</strong></p>
 
