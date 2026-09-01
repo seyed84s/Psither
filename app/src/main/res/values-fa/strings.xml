@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">اِتِر</string>
     <string name="tagline">آزادی، در یک لمس</string>
@@ -69,13 +69,13 @@
     <string name="diag_empty_logs">هنوز لاگی نیست. متصل شوید یا تست را اجرا کنید.</string>
 
     <!-- About panel -->
-    <string name="about_title">درباره</string>
-    <string name="about_subtitle">سازندگان، لینک‌ها و تغییرات این نسخه</string>
+    <string name="about_title">درباره Psither</string>
+    <string name="about_subtitle">درباره پروژه، سازندگان و هسته</string>
     <string name="about_version">نسخه %1$s</string>
-    <string name="about_original_title">پروژه اصلی — Cluvex Studio</string>
-    <string name="about_original_note">هسته‌ی اصلی که این برنامه از آن قدرت می‌گیرد</string>
-    <string name="about_port_title">نسخه اندروید — QW-AI-Code</string>
-    <string name="about_port_note">مواردی که در این نسخه ارتقا داده‌ایم</string>
+    <string name="about_original_title">تقدیر و تشکر</string>
+    <string name="about_original_note">توسعه یافته بر پایه پروژه‌های متن‌باز</string>
+    <string name="about_port_title">پروژه Psither</string>
+    <string name="about_port_note">انقلابی در زنجیره‌سازی پرسرعت فیلترشکن</string>
     <string name="menu_open">باز کردن منو</string>
     <string name="advanced_open">باز کردن تنظیمات پیشرفته</string>
 

@@ -39,42 +39,26 @@ import androidx.compose.ui.unit.dp
 import studio.cluvex.aether.BuildConfig
 import studio.cluvex.aether.R
 
-private const val URL_ORIGINAL_GITHUB = "https://github.com/CluvexStudio/Aether"
-private const val URL_ORIGINAL_TELEGRAM = "https://t.me/CluvexStudio"
-private const val URL_PORT_GITHUB = "https://github.com/QW-AI-Code"
+private const val URL_PORT_GITHUB = "https://github.com/seyed84s/aether-psiphon"
+private const val URL_AETHER_GITHUB = "https://github.com/bepass-org/Aether"
+private const val URL_XPSIPHON_GITHUB = "https://github.com/IzumiRain/xPsiphon"
 
-// Deliberately English-only, mirroring the upstream README's feature list.
-private val ORIGINAL_FEATURES = listOf(
-    "Automatic endpoint discovery with end-to-end data-plane validation",
-    "MASQUE (HTTP/3 & HTTP/2) with optional TLS ClientHello fragmentation",
-    "WireGuard and nested WireGuard (WARP-in-WARP \"gool\")",
-    "Traffic obfuscation for DPI-heavy networks",
-    "Automatic reconnection with quick-reconnect to the last good gateway",
-    "Local SOCKS5 proxy — CLI for Linux, Windows, macOS and Android (Termux)",
+private val PORT_IMPROVEMENTS = listOf(
+    "Multi-Country Psiphon Chaining (20+ Regions)",
+    "Vibrant, energetic, and highly animated UI",
+    "Turbo Scan Mode enabled by default for hyper-fast connections",
+    "Smart reconnect, auto-reprovision, and connection stability improvements",
+    "Zero-knowledge DNS integration with Psiphon"
 )
 
-// What this edition adds on top of upstream (which ships no Android or
-// Windows GUI — CLI/Termux only).
-private val PORT_IMPROVEMENTS = listOf(
-    "Full native Android app — upstream is CLI-only (no Android or Windows GUI)",
-    "One-tap system-wide VPN via Android VpnService — no manual proxy setup",
-    "Embedded hev-socks5-tunnel (tun2socks) running in-process on a native thread",
-    "Live \"Your IP / Server IP\" badge with multi-provider geolocation",
-    "Step-by-step connectivity self-test with crash-persistent diagnostic logs",
-    "Automatic reconnect with backoff and per-scan-mode connect timeouts",
-    "Protocol, scan-mode and IP-version controls in a Material 3 UI (English + فارسی)",
-    "Quick Settings tile — connect/disconnect straight from the notification shade",
-    "Share the VPN over Wi‑Fi/hotspot — built-in HTTP + SOCKS5 proxy for laptops & other phones",
-    "Advanced settings reachable right from the home screen",
-    "Signed per-ABI release APKs published automatically from GitHub Actions",
-    "Engine version shown in About, so the bundled core is always verifiable",
-    "Zero Trust (WARP for organizations), split routing rules and custom in-tunnel DNS",
+private val ORIGINAL_FEATURES = listOf(
+    "Aether Core Engine (Cloudflare WARP + WireGuard)",
+    "xPsiphon routing profiles and node integrations",
 )
 
 /**
- * Collapsible "About" card: credits the upstream Aether project (Cluvex
- * Studio) with its GitHub + Telegram links and feature set, then lists what
- * this Android edition (QW-AI-Code) adds on top.
+ * Collapsible "About" card: features the Psither project prominently and
+ * acknowledges the base engine (Aether) and routing layer (xPsiphon).
  */
 @Composable
 fun AboutPanel(modifier: Modifier = Modifier) {
@@ -84,7 +68,7 @@ fun AboutPanel(modifier: Modifier = Modifier) {
     val versionName = remember {
         runCatching {
             context.packageManager.getPackageInfo(context.packageName, 0).versionName
-        }.getOrNull() ?: "1.1.0"
+        }.getOrNull() ?: "1.0.0"
     }
 
     Card(
@@ -137,12 +121,6 @@ fun AboutPanel(modifier: Modifier = Modifier) {
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    // Engine (core) version — same idea as the Windows edition's
-                    // About page, which shows app version AND core version so a
-                    // user can verify the bundled engine is current.
-                    // BuildConfig.CORE_VERSION is stamped at build time from
-                    // native/aether/CORE_VERSION, i.e. from whatever
-                    // scripts/sync-core.sh actually vendored for THIS build.
                     Text(
                         text = stringResource(R.string.about_core_version, BuildConfig.CORE_VERSION),
                         style = MaterialTheme.typography.bodySmall,
@@ -151,28 +129,28 @@ fun AboutPanel(modifier: Modifier = Modifier) {
 
                     Spacer(Modifier.height(16.dp))
 
-                    // ---- Original project (Cluvex Studio) ----
-                    SectionHeader(
-                        title = stringResource(R.string.about_original_title),
-                        note = stringResource(R.string.about_original_note),
-                    )
-                    LinkRow(R.drawable.ic_github, "github.com/CluvexStudio/Aether", URL_ORIGINAL_GITHUB)
-                    LinkRow(R.drawable.ic_telegram, "t.me/CluvexStudio", URL_ORIGINAL_TELEGRAM)
-                    Spacer(Modifier.height(6.dp))
-                    FeatureList(ORIGINAL_FEATURES)
-
-                    Spacer(Modifier.height(16.dp))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                    Spacer(Modifier.height(14.dp))
-
-                    // ---- This Android edition (QW-AI-Code) ----
+                    // ---- This project (Psither) ----
                     SectionHeader(
                         title = stringResource(R.string.about_port_title),
                         note = stringResource(R.string.about_port_note),
                     )
-                    LinkRow(R.drawable.ic_github, "github.com/QW-AI-Code", URL_PORT_GITHUB)
+                    LinkRow(R.drawable.ic_github, "github.com/seyed84s/aether-psiphon", URL_PORT_GITHUB)
                     Spacer(Modifier.height(6.dp))
                     FeatureList(PORT_IMPROVEMENTS)
+                    
+                    Spacer(Modifier.height(16.dp))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+                    Spacer(Modifier.height(14.dp))
+
+                    // ---- Acknowledgements ----
+                    SectionHeader(
+                        title = stringResource(R.string.about_original_title),
+                        note = stringResource(R.string.about_original_note),
+                    )
+                    LinkRow(R.drawable.ic_github, "Aether Core Engine", URL_AETHER_GITHUB)
+                    LinkRow(R.drawable.ic_github, "xPsiphon Project", URL_XPSIPHON_GITHUB)
+                    Spacer(Modifier.height(6.dp))
+                    FeatureList(ORIGINAL_FEATURES)
                 }
             }
         }

@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import studio.cluvex.aether.ui.theme.AetherBlue
+import studio.cluvex.aether.ui.theme.AetherCyan
 import studio.cluvex.aether.ui.theme.AetherError
 import studio.cluvex.aether.ui.theme.AetherMint
 import studio.cluvex.aether.ui.theme.Navy700
@@ -56,14 +57,14 @@ fun ConnectButton(
 ) {
     val borderColor = when (mode) {
         ButtonMode.IDLE -> AetherBlue
-        ButtonMode.BUSY -> AetherBlue
+        ButtonMode.BUSY -> AetherCyan
         ButtonMode.CONNECTED -> AetherMint
         ButtonMode.ERROR -> AetherError
     }
 
     val contentColor = when (mode) {
         ButtonMode.IDLE -> AetherBlue
-        ButtonMode.BUSY -> AetherBlue
+        ButtonMode.BUSY -> AetherCyan
         ButtonMode.CONNECTED -> AetherMint
         ButtonMode.ERROR -> AetherError
     }

@@ -68,8 +68,8 @@ android {
         applicationId = "app.psither"
         minSdk = 26
         targetSdk = 35
-        versionCode = 10
-        versionName = "1.2.6"
+        versionCode = 1
+        versionName = "1.0.0"
 
         ndk {
             // We ship arm64 (primary) and arm builds.

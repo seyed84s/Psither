@@ -69,14 +69,14 @@
     <string name="diag_empty_logs">No logs yet. Connect or run a test.</string>
 
     <!-- About panel -->
-    <string name="about_title">About</string>
-    <string name="about_subtitle">Credits, links &amp; what this build adds</string>
+    <string name="about_title">About Psither</string>
+    <string name="about_subtitle">Project info, credits &amp; engine details</string>
     <string name="about_version">Version %1$s</string>
-    <string name="about_original_title">Original project — Cluvex Studio</string>
-    <string name="about_original_note">The core engine powering this app</string>
-    <string name="about_port_title">Android edition — QW-AI-Code</string>
-    <string name="about_port_note">What we upgraded in this edition</string>
-    <string name="menu_open">Open menu</string>
+    <string name="about_original_title">Acknowledgements</string>
+    <string name="about_original_note">Built upon the shoulders of giants</string>
+    <string name="about_port_title">Psither Project</string>
+    <string name="about_port_note">A high-speed revolution in VPN chaining</string>
+    <string name="about_core_version">Engine (core) version %1$s</string>
     <string name="advanced_open">Open advanced settings</string>
 
     <!-- Quick Settings tile -->
